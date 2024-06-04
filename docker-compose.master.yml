@@ -62,7 +62,7 @@ services:
       - mariadb
       - pdns
     ports:
-      - "9191:8080"
+      - "8080:8080"
     networks:
       - pdns_network
 
