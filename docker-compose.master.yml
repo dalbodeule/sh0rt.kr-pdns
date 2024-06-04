@@ -23,6 +23,7 @@ services:
       PDNS_gmysql_user: ${MARIADB_USER}
       PDNS_gmysql_password: ${MARIADB_PASSWORD}
       PDNS_gmysql_dbname: ${MARIADB_DATABASE}
+      PDNS_gmysql-dnssec: true
       PDNS_primary: yes
       PDNS_api: yes
       PDNS_api_key: ${PDNS_API_KEY}
