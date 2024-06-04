@@ -29,6 +29,7 @@ services:
       PDNS_webserver: yes
       PDNS_webserver_address: 0.0.0.0
       PDNS_webserver_password: ${PDNS_WEBSERVER_KEY}
+      PDNS_webserver_allow_from: 10.0.10.0/24
       PDNS_version_string: ${PDNS_VERSION_STRING}
       PDNS_default_ttl: 300
       PDNS_allow_axfr_ips: 172.17.0.0
@@ -72,3 +73,8 @@ volumes:
 networks:
   pdns_network:
     driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "10.0.10.0/24"
+          gateway: "10.0.10.1"
