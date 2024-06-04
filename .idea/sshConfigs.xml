@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SshConfigs">
+    <configs>
+      <sshConfig host="jioo0224@jioo0224.ipdisk.co.kr" id="148aa209-4df2-4b62-a57a-9020b382d4c9" keyPath="$USER_HOME$/.ssh/id_rsa" port="51022" nameFormat="DESCRIPTIVE" username="jioo0224" useOpenSSHConfig="true" />
+    </configs>
+  </component>
+</project>

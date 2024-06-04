@@ -1,0 +1,74 @@
+version: '3'
+
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: pdns-mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - pdns_network
+
+  pdns:
+    image: pschiffe/pdns-mysql:latest
+    container_name: pdns-master
+    environment:
+      PDNS_gmysql_host: mariadb
+      PDNS_gmysql_port: 3306
+      PDNS_gmysql_user: ${PDNS_GMYSQL_USER}
+      PDNS_gmysql_password: ${PDNS_GMYSQL_PASSWORD}
+      PDNS_gmysql_dbname: ${MARIADB_DATABASE}
+      PDNS_primary: yes
+      PDNS_api: yes
+      PDNS_api_key: ${PDNS_API_KEY}
+      PDNS_webserver: yes
+      PDNS_webserver_address: 0.0.0.0
+      PDNS_webserver_password: ${PDNS_WEBSERVER_KEY}
+      PDNS_version_string: ${PDNS_VERSION_STRING}
+      PDNS_default_ttl: 300
+      PDNS_allow_axfr_ips: 172.17.0.0
+      PDNS_only_notify: 172.5.0.21
+    depends_on:
+      - mariadb
+    links:
+      - mariadb
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "8081:8081"
+    networks:
+      - pdns_network
+
+  pdns-admin:
+    image: pschiffe/pdns-admin:latest
+    container_name: pdns-admin
+    environment:
+      PDNS_ADMIN_SQLA_DB_HOST: mariadb
+      PDNS_ADMIN_SQLA_DB_PORT: 3306
+      PDNS_ADMIN_SQLA_DB_USER: ${MARIADB_USER}
+      PDNS_ADMIN_SQLA_DB_PASSWORD: ${MARIADB_PASSWORD}
+      PDNS_ADMIN_SQLA_DB_NAME: ${MARIADB_PASSWORD}
+      PDNS_STATS_URL: http://pdns:8081
+      PDNS_API_KEY: ${PDNS_API_KEY}
+      PDNS_VERSION: ${PDNS_VERSION_STRING}
+    depends_on:
+      - pdns
+    links:
+      - mariadb
+      - pdns
+    ports:
+      - "9191:8080"
+    networks:
+      - pdns_network
+
+volumes:
+  mariadb_data:
+
+networks:
+  pdns_network:
+    driver: bridge
