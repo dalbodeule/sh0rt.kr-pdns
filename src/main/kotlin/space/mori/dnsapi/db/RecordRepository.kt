@@ -12,8 +12,11 @@ interface RecordRepository : JpaRepository<Record?, Long?> {
     fun findByCfid(cfid: String): Optional<Record>
 
     @Transactional
-    fun deleteByCfid(cfid: String)
+    fun findByDomainIdAndCfid(domainId: Long, cfid: String): Optional<Record>
 
-    @Query("SELECT r FROM Record r WHERE r.domain.cfid = :domainCfid")
-    fun findByDomainCfid(@Param("domainCfid") cfid: String): List<Record>
+    @Transactional
+    fun deleteByCfid(cfid: String): Int
+
+    @Transactional
+    fun deleteByDomainIdAndCfid(domain_id: Long, cfid: String): Int
 }

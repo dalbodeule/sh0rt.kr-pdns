@@ -31,6 +31,8 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")
 
+	implementation("com.google.code.gson:gson:2.11.0")
+
 	implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
 
 	runtimeOnly("org.mariadb.jdbc:mariadb-java-client")

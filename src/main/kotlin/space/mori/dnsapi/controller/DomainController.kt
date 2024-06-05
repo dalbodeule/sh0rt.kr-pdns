@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.ErrorResponse
 import org.springframework.web.bind.annotation.*
 import space.mori.dnsapi.db.Domain
 import space.mori.dnsapi.dto.DomainResponseDTO
@@ -68,5 +67,5 @@ class DomainController {
         domainService!!.deleteDomain(cfid!!)
     }
 
-    private fun Domain.toDTO() = DomainResponseDTO(cfid = cfid!!, domainName = domainName!!)
+    private fun Domain.toDTO() = DomainResponseDTO(id = cfid, name = name)
 }
