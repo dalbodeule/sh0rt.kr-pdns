@@ -1,4 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 plugins {
 	id("java")
@@ -10,6 +13,8 @@ plugins {
 	kotlin("plugin.spring") version "1.9.24"
 	kotlin("plugin.jpa") version "1.9.24"
 }
+
+val datetimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm")
 
 group = "space.mori"
 version = "0.0.1-SNAPSHOT"
@@ -61,5 +66,10 @@ hibernate {
 
 tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
 	systemProperty("spring.profiles.active", "dev")
+}
+
+tasks.named<BootBuildImage>("bootBuildImage") {
+	imageName = "dalbodeule/dnsapi"
+	tags = setOf("latest", datetimeFormatter.format(LocalDateTime.now()))
 }
 
