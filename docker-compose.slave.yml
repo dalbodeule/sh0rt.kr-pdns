@@ -9,6 +9,7 @@ services:
       MARIADB_DATABASE: ${MARIADB_DATABASE}
       MARIADB_USER: ${MARIADB_USER}
       MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      MARIADB_MASTER_HOST: ${MARIADB_MASTER_HOST}
     volumes:
       - mariadb_data:/var/lib/mysql
     networks:
@@ -47,29 +48,6 @@ services:
       - "53:53/tcp"
       - "53:53/udp"
       - "8081:8081"
-    networks:
-      - pdns_network
-    restart: always
-
-  pdns-admin:
-    image: pschiffe/pdns-admin:latest
-    container_name: pdns-admin
-    environment:
-      PDNS_ADMIN_SQLA_DB_HOST: mariadb
-      PDNS_ADMIN_SQLA_DB_PORT: 3306
-      PDNS_ADMIN_SQLA_DB_USER: ${MARIADB_USER}
-      PDNS_ADMIN_SQLA_DB_PASSWORD: ${MARIADB_PASSWORD}
-      PDNS_ADMIN_SQLA_DB_NAME: pdns
-      PDNS_STATS_URL: http://pdns:8081
-      PDNS_API_KEY: ${PDNS_API_KEY}
-      PDNS_VERSION: ${PDNS_VERSION_STRING}
-    depends_on:
-      - pdns
-    links:
-      - mariadb
-      - pdns
-    ports:
-      - "8080:8080"
     networks:
       - pdns_network
     restart: always
