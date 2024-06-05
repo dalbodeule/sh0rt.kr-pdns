@@ -13,6 +13,7 @@ services:
       MARIADB_REPLICATION_PASSWORD: ${MARIADB_REPLICA_PASSWORD}
     volumes:
       - mariadb_data:/var/lib/mysql
+      - mariadb_config:/etc/mysql
     networks:
       - pdns_network
     ports:
