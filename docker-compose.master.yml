@@ -70,8 +70,6 @@ services:
     links:
       - mariadb
       - pdns
-    ports:
-      - "8080:8080"
     networks:
       - pdns_network
     restart: always
@@ -85,9 +83,12 @@ services:
     ports:
       - 80:80
       - 443:443
+      - 8443:8443
     volumes: # Storage can be either a
       - nginx_secrets:/etc/letsencrypt          # Docker managed volume (see list at the bottom)
       - nginx_conf:/etc/nginx/user_conf.d    # or a host mount with a relative or full path.
+    networks:
+      - pdns_network
 
 volumes:
   mariadb_data:
