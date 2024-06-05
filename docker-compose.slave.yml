@@ -56,7 +56,9 @@ services:
     image: jonasal/nginx-certbot:latest
     restart: always
     environment:
-      - CERTBOT_EMAIL
+      CERTBOT_EMAIL: ${CERTBOT_EMAIL}
+      DHPARAM_SIZE: 4096
+      RSA_KEY_SIZE: 4096
     env_file:
       - ./nginx-certbot.env
     ports:
