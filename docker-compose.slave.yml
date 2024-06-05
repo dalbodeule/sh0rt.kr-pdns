@@ -17,7 +17,7 @@ services:
 
   pdns:
     image: pschiffe/pdns-mysql:latest
-    container_name: pdns-master
+    container_name: pdns-slave
     environment:
       PDNS_gmysql_host: mariadb
       PDNS_gmysql_port: 3306
@@ -25,7 +25,8 @@ services:
       PDNS_gmysql_password: ${MARIADB_PASSWORD}
       PDNS_gmysql_dbname: ${MARIADB_DATABASE}
       PDNS_gmysql-dnssec: true
-      PDNS_primary: yes
+      PDNS_slave: yes
+      PDNS_master: ${MASTER_PDNS_IP}
       PDNS_api: yes
       PDNS_api_key: ${PDNS_API_KEY}
       PDNS_webserver: yes
