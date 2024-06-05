@@ -13,6 +13,8 @@ services:
       - mariadb_data:/var/lib/mysql
     networks:
       - pdns_network
+    ports:
+      - "3306:3306"
     restart: always
 
   pdns:
