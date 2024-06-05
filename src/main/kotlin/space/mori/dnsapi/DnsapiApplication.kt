@@ -3,6 +3,8 @@ package space.mori.dnsapi
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import io.github.cdimascio.dotenv.dotenv
+import org.springframework.security.core.context.SecurityContextHolder
+import space.mori.dnsapi.db.User
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter

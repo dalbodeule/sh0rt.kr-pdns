@@ -10,5 +10,8 @@ interface DomainRepository : JpaRepository<Domain?, Long?> {
     fun findByCfid(cfid: String): Optional<Domain>
 
     @Transactional
-    fun deleteByCfid(cfid: String)
+    fun findAllByUser(user: User): List<Domain>
+
+    @Transactional
+    fun deleteByCfid(cfid: String): Int
 }

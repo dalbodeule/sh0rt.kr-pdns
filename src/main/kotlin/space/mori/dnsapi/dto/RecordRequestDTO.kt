@@ -7,7 +7,7 @@ data class RecordRequestDTO(
     @Schema(description = "Record type", example = "A")
     val type: String,
 
-    @Schema(description = "Host name", example = "www.example.com.")
+    @Schema(description = "Host name", example = "www")
     val name: String,
 
     @Schema(description = "Record data", example = "192.0.2.1")

@@ -11,7 +11,7 @@ data class RecordResponseDTO(
     @Schema(description = "Record type", example = "A")
     var type: String,
 
-    @Schema(description = "Record name", example = "test.example.com")
+    @Schema(description = "Record name", example = "test")
     var name: String,
 
     @Schema(description = "Record content", example = "1.1.1.1")

@@ -7,9 +7,11 @@ import space.mori.dnsapi.PowerDNSApiClient
 import space.mori.dnsapi.db.DomainRepository
 import space.mori.dnsapi.db.Record as DomainRecord
 import space.mori.dnsapi.db.RecordRepository
+import space.mori.dnsapi.db.UserRepository
 import space.mori.dnsapi.dto.DomainRequestDTO
 import space.mori.dnsapi.dto.RecordRequestDTO
 import space.mori.dnsapi.dto.RecordResponseDTO
+import space.mori.dnsapi.filter.getCurrentUser
 import space.mori.dnsapi.getISOFormat
 import java.util.*
 
@@ -21,18 +23,25 @@ class RecordService(
     @Autowired
     private val domainRepository: DomainRepository,
     @Autowired
-    private val recordRepository: RecordRepository
+    private val recordRepository: RecordRepository,
+    @Autowired
+    private val userRepository: UserRepository,
 ) {
     fun createRecord(domain_id: String, recordRequest: RecordRequestDTO): RecordResponseDTO {
-        val domain = domainRepository.findByCfid(domain_id)
-        if(domain.isEmpty) throw RuntimeException("Failed to find domain in API: $domain_id")
+        val domain = domainRepository.findByCfid(domain_id).orElseThrow {
+            throw RuntimeException("Failed to find domain in API: $domain_id")
+        }
 
-        val response = powerDNSApiClient.createRecord(domain.get().name, recordRequest)
+        val user = getCurrentUser()
+        if(domain.user.id != user.id)
+            throw RuntimeException("Unauthorized to create record in API: $domain_id")
+
+        val response = powerDNSApiClient.createRecord(domain.name, recordRequest)
         if (!response.statusCode.is2xxSuccessful) {
             throw RuntimeException("Failed to create record in PowerDNS: ${response.body}")
         }
        val record = DomainRecord(
-           domain = domain.get(),
+           domain = domain,
            name = recordRequest.name,
            type = recordRequest.type,
            content = recordRequest.content,
@@ -55,7 +64,7 @@ class RecordService(
             ttl = record.ttl,
             locked = false,
             zoneId = record.cfid,
-            zoneName = domain.get().name,
+            zoneName = domain.name,
             createdOn = record.createdOn.getISOFormat(),
             modifiedOn = record.modifiedOn.getISOFormat(),
             priority = record.prio,
@@ -64,10 +73,15 @@ class RecordService(
     }
 
     fun getRecord(domain_id: String, record_id: String): RecordResponseDTO {
-        val domain = domainRepository.findByCfid(domain_id)
-        if(domain.isEmpty) throw RuntimeException("Failed to find domain in API: $domain_id")
+        val domain = domainRepository.findByCfid(domain_id).orElseThrow {
+            RuntimeException("Failed to find domain in API: $domain_id")
+        }
 
-        val record = domain.get().records.find { it.cfid == record_id }
+        val user = getCurrentUser()
+        if(domain.user.id != user.id)
+            throw RuntimeException("Unauthorized to get record in API: $domain_id")
+
+        val record = domain.records.find { it.cfid == record_id }
         if(record == null) throw RuntimeException("Failed to find record in API: $record_id")
 
         return RecordResponseDTO(
@@ -85,7 +99,14 @@ class RecordService(
     }
 
     fun getRecordsByDomain(domain_id: String): List<RecordResponseDTO>? {
-        val domain = domainRepository.findByCfid(domain_id).orElseThrow { RuntimeException("Failed to find domain in API: $domain_id") }
+        val domain = domainRepository.findByCfid(domain_id).orElseThrow {
+            RuntimeException("Failed to find domain in API: $domain_id")
+        }
+
+        val user = getCurrentUser()
+        if(domain.user.id != user.id)
+            throw RuntimeException("Unauthorized to create record in API: $domain_id")
+
         return domain?.records?.map { RecordResponseDTO(
             id = it.cfid,
             type = it.type,
@@ -102,10 +123,15 @@ class RecordService(
     }
 
     @Transactional
-    fun updateRecord(domainId: String, cfid: String, updatedRecord: RecordRequestDTO): RecordResponseDTO {
+    fun updateRecord(domain_id: String, cfid: String, updatedRecord: RecordRequestDTO): RecordResponseDTO {
         // 도메인 조회
-        val domain = domainRepository.findByCfid(domainId)
-            .orElseThrow { RuntimeException("Domain not found") }
+        val domain = domainRepository.findByCfid(domain_id).orElseThrow {
+            RuntimeException("Failed to find domain in API: $domain_id")
+        }
+
+        val user = getCurrentUser()
+        if(domain.user.id != user.id)
+            throw RuntimeException("Unauthorized to create record in API: $domain_id")
 
         // 레코드 조회
         val record = recordRepository.findByDomainIdAndCfid(domain.id!!, cfid)
@@ -144,18 +170,18 @@ class RecordService(
         )
     }
 
-    fun deleteRecord(domain_id: String, record_id: String) {
-        val domain = domainRepository.findByCfid(domain_id).orElseThrow { RuntimeException("Failed to find domain in API: $domain_id") }
+    fun deleteRecord(domain_id: String, record_id: String): String {
+        val domain = domainRepository.findByCfid(domain_id).orElseThrow {
+            RuntimeException("Failed to find domain in API: $domain_id")
+        }
+
+        val user = getCurrentUser()
+        if(domain.user.id != user.id)
+            throw RuntimeException("Unauthorized to create record in API: $domain_id")
 
         val deletedCount = recordRepository.deleteByDomainIdAndCfid(domain.id!!, record_id)
 
         if(deletedCount == 0) throw RuntimeException("Failed to find record in API: $record_id")
-    }
-
-    fun deleteDomain(name: String) {
-        val response = powerDNSApiClient.deleteDomain(name)
-        if (!response.statusCode.is2xxSuccessful) {
-            throw RuntimeException("Failed to delete domain in PowerDNS: ${response.body}")
-        }
+        else return record_id
     }
 }
