@@ -78,6 +78,7 @@ services:
 
 volumes:
   mariadb_data:
+  mariadb_config:
 
 networks:
   pdns_network:
