@@ -5,6 +5,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
@@ -22,33 +23,35 @@ class PowerDNSAPIClient() {
     private val gson = Gson()
     private val client = OkHttpClient()
 
-    fun createZone(zoneName: String): Boolean {
+    fun createZone(zoneName: String): Response {
         val body = gson.toJson(mapOf(
             "name" to zoneName,
             "nameservers" to nameserver.split(","))
         ).toRequestBody("application/json; charset=utf-8".toMediaType())
         val request = Request.Builder()
             .url("$apiUrl/api/v1/servers/localhost/zones")
-            .addHeader("Authorization", "Bearer $apiKey")
+            .addHeader("X-API-Key", apiKey)
             .post(body)
             .build()
 
         val response = client.newCall(request).execute()
-        return response.isSuccessful
+        if(!response.isSuccessful) { throw RuntimeException("Unexpected code $response") }
+        return response
     }
 
-    fun deleteZone(zoneName: String): Boolean {
+    fun deleteZone(zoneName: String): Response {
         val request = Request.Builder()
             .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName")
-            .addHeader("Authorization", "Bearer $apiKey")
+            .addHeader("X-API-Key", apiKey)
             .delete()
             .build()
 
         val response = client.newCall(request).execute()
-        return response.isSuccessful
+        if(!response.isSuccessful) { throw RuntimeException("Unexpected code $response") }
+        return response
     }
 
-    fun createRecord(zoneName: String, recordName: String, recordType: String, recordContent: String): Boolean {
+    fun createRecord(zoneName: String, recordName: String, recordType: String, recordContent: String): Response {
         val body = gson.toJson(mapOf(
             "name" to recordName,
             "type" to recordType,
@@ -56,36 +59,39 @@ class PowerDNSAPIClient() {
         )).toRequestBody("application/json; charset=utf-8".toMediaType())
         val request = Request.Builder()
             .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName/records")
-            .addHeader("Authorization", "Bearer $apiKey")
+            .addHeader("X-API-Key", apiKey)
             .post(body)
             .build()
 
         val response = client.newCall(request).execute()
-        return response.isSuccessful
+        if(!response.isSuccessful) { throw RuntimeException("Unexpected code $response") }
+        return response
     }
 
-    fun updateRecord(zoneName: String, recordName: String, recordType: String, recordContent: String): Boolean {
+    fun updateRecord(zoneName: String, recordName: String, recordType: String, recordContent: String): Response {
         val body = gson.toJson(mapOf(
             "content" to recordContent
         )).toRequestBody("application/json; charset=utf-8".toMediaType())
         val request = Request.Builder()
             .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName/records/$recordName/$recordType")
-            .addHeader("Authorization", "Bearer $apiKey")
+            .addHeader("X-API-Key", apiKey)
             .put(body)
             .build()
 
         val response = client.newCall(request).execute()
-        return response.isSuccessful
+        if(!response.isSuccessful) { throw RuntimeException("Unexpected code $response") }
+        return response
     }
 
-    fun deleteRecord(zoneName: String, recordName: String, recordType: String): Boolean {
+    fun deleteRecord(zoneName: String, recordName: String, recordType: String): Response {
         val request = Request.Builder()
             .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName/records/$recordName/$recordType")
-            .addHeader("Authorization", "Bearer $apiKey")
+            .addHeader("X-API-Key", apiKey)
             .delete()
             .build()
 
         val response = client.newCall(request).execute()
-        return response.isSuccessful
+        if(!response.isSuccessful) { throw RuntimeException("Unexpected code $response") }
+        return response
     }
 }
