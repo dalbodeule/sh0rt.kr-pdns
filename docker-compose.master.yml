@@ -73,6 +73,19 @@ services:
     networks:
       - pdns_network
     restart: always
+
+  pdns-api:
+    image: dalbodeule/dnsapi:latest
+    container_name: pdns-api
+    environment:
+      DB_NAME: pdns
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      DB_USER: ${MARIADB_USER}
+      DB_PASSWORD: ${MARIADB_PASSWORD}
+      PDNS_API_URL: http://pdns:8081
+      PDNS_API_KEY: ${PDNS_API_KEY}
+
   nginx:
     image: jonasal/nginx-certbot:latest
     restart: always
