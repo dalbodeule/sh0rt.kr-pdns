@@ -61,12 +61,19 @@ tasks.withType<Test> {
 }
 
 tasks.withType<BootBuildImage> {
+	val dockerId = System.getenv("DOCKER_USERNAME")
+	val dockerPw = System.getenv("DOCKER_PASSWORD")
+
 	docker {
 		publish = true
+		publishRegistry {
+			username = dockerId
+			password = dockerPw
+		}
 	}
 
-	imageName.set("dalbodeule/dnsapi")
-	tags.set(setOf("dalbodeule/dnsapi:latest", "dalbodeule/dnsapi:${datetimeFormatter.format(LocalDateTime.now())}"))
+	imageName.set("$dockerId/dnsapi")
+	tags.set(setOf("$dockerId/dnsapi:latest", "$dockerId/dnsapi:${datetimeFormatter.format(LocalDateTime.now())}"))
 	buildpacks.set(setOf("docker.io/paketobuildpacks/oracle", "urn:cnb:builder:paketo-buildpacks/java-native-image"))
 
 	environment = mapOf(
