@@ -26,7 +26,7 @@ class PowerDNSApiClient {
     }
 
     fun createDomain(name: String): ResponseEntity<String> {
-        val url = "$apiUrl/servers/localhost/zones"
+        val url = "$apiUrl/api/v1/servers/localhost/zones"
         val headers = createHeaders()
         val domainRequest = DomainRequest("$name.", "Master", arrayOf(), arrayOf())
         val body = gson.toJson(domainRequest)
@@ -35,7 +35,7 @@ class PowerDNSApiClient {
     }
 
     fun createRecord(domainName: String, recordRequest: RecordRequestDTO): ResponseEntity<String> {
-        val url = "$apiUrl/servers/localhost/zones/$domainName."
+        val url = "$apiUrl/api/v1/servers/localhost/zones/$domainName."
         val headers = createHeaders()
         val record = RecordRequest(
             name = "${recordRequest.name}.$domainName.",
@@ -50,7 +50,7 @@ class PowerDNSApiClient {
     }
 
     fun deleteDomain(name: String): ResponseEntity<String> {
-        val url = "$apiUrl/servers/localhost/zones/$name."
+        val url = "$apiUrl/api/v1/servers/localhost/zones/$name."
         val headers = createHeaders()
         val entity = HttpEntity<String>(headers)
         return restTemplate.exchange(url, HttpMethod.DELETE, entity, String::class.java)

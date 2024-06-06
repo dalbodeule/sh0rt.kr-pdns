@@ -5,16 +5,12 @@ import org.springframework.stereotype.Service
 import space.mori.dnsapi.PowerDNSApiClient
 import space.mori.dnsapi.db.Domain
 import space.mori.dnsapi.db.DomainRepository
-import space.mori.dnsapi.db.UserRepository
 import space.mori.dnsapi.dto.DomainRequestDTO
 import space.mori.dnsapi.filter.getCurrentUser
-import java.util.*
 
 
 @Service
 class DomainService(
-    @Autowired
-    private val userRepository: UserRepository,
     @Autowired
     private val domainRepository: DomainRepository,
     @Autowired
@@ -49,6 +45,11 @@ class DomainService(
     }
 
     fun deleteDomain(domain_id: String): String {
+        val domain = domainRepository.findByCfid(domain_id).orElseThrow {
+            throw RuntimeException("Domain with CFID $domain_id not found")
+        }
+
+        powerDNSApiClient.deleteDomain(domain.name)
         val count = domainRepository.deleteByCfid(domain_id)
 
         if(count > 0) throw RuntimeException("Domain with CFID $domain_id not found")
