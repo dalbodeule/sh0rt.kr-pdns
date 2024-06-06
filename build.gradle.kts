@@ -61,8 +61,8 @@ tasks.withType<Test> {
 }
 
 tasks.withType<BootBuildImage> {
-	val dockerId = System.getenv("DOCKER_USERNAME")
-	val dockerPw = System.getenv("DOCKER_PASSWORD")
+	val dockerId = System.getenv("DOCKER_USERNAME") ?: "dalbodeule"
+	val dockerPw = System.getenv("DOCKER_PASSWORD") ?: ""
 
 	docker {
 		publish = true
