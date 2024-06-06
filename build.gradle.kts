@@ -64,8 +64,16 @@ tasks.withType<BootBuildImage> {
 	val dockerId = System.getenv("DOCKER_ID")
 	val dockerPw = System.getenv("docker_pw")
 
+	docker {
+		publish = true
+		publishRegistry {
+			username = dockerId
+			password = dockerPw
+		}
+	}
+
 	imageName.set("dalbodeule/dnsapi")
-	tags.set(setOf("latest", datetimeFormatter.format(LocalDateTime.now())))
+	tags.set(setOf("dalbodeule/dnsapi:latest", "dalbodeule/dnsapi:${datetimeFormatter.format(LocalDateTime.now())}"))
 	buildpacks.set(setOf("docker.io/paketobuildpacks/oracle", "urn:cnb:builder:paketo-buildpacks/java-native-image"))
 
 	environment = mapOf(
@@ -74,14 +82,6 @@ tasks.withType<BootBuildImage> {
 		"BP_JVM_TYPE" to "JDK",
 		"BP_JVM_VERSION" to "21",
 	)
-
-	docker {
-		publish = true
-		publishRegistry {
-			username = dockerId
-			password = dockerPw
-		}
-	}
 }
 
 hibernate {
