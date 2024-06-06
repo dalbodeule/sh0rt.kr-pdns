@@ -17,7 +17,7 @@ plugins {
 val datetimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm")
 
 group = "space.mori"
-version = "0.0.1-SNAPSHOT"
+version = "0.0.1"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_21
@@ -36,8 +36,10 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")
 
-	implementation("com.google.code.gson:gson:2.11.0")
+	// https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-bindings
+	implementation("org.springframework.cloud:spring-cloud-bindings:2.0.3")
 
+	implementation("com.google.code.gson:gson:2.11.0")
 	implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
 
 	runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
@@ -58,6 +60,20 @@ tasks.withType<Test> {
 	useJUnitPlatform()
 }
 
+tasks.withType<BootBuildImage> {
+	val imageNames = "dalbodeule/dnsapi"
+
+	imageName = imageNames
+	tags.set(setOf("$imageNames:latest", "$imageNames:${datetimeFormatter.format(LocalDateTime.now())}"))
+
+	environment = mapOf(
+		"BP_NATIVE_IMAGE" to "true",
+		"BP_NATIVE_IMAGE_BUILD_ARGUMENTS" to "-march=compatibility",
+		"BP_JVM_TYPE" to "JDK",
+		"BP_JVM_VERSION" to "21"
+	)
+}
+
 hibernate {
 	enhancement {
 		enableAssociationManagement.set(true)
@@ -68,8 +84,8 @@ tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
 	systemProperty("spring.profiles.active", "dev")
 }
 
-tasks.named<BootBuildImage>("bootBuildImage") {
-	imageName = "dalbodeule/dnsapi"
-	tags = setOf("latest", datetimeFormatter.format(LocalDateTime.now()))
+graalvmNative {
+	binaries.all {
+		buildArgs.add("--initialize-at-build-time=org.slf4j.helpers")
+	}
 }
-
