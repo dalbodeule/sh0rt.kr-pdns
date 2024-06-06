@@ -3,7 +3,7 @@ name: build
 #event trigger : main 브랜치에 push 이벤트 발생시 jobs가 실행된다.
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
 
 #권한 설정
 permissions:
