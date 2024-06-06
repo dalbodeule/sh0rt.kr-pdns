@@ -20,6 +20,7 @@ fun main(args: Array<String>) {
 		"DB_PASSWORD" to dotenv["DB_PASSWORD"],
 		"PDNS_API_KEY" to dotenv["PDNS_API_KEY"],
 		"PDNS_API_URL" to dotenv["PDNS_API_URL"],
+		"PDNS_NS" to dotenv["PDNS_NS"]
 	)
 
 	runApplication<DnsapiApplication>(*args) {

@@ -16,7 +16,7 @@ class PowerDNSApiClient {
     private lateinit var apiKey: String
 
     @Value("\${pdns.ns}")
-    private lateinit var ns: String
+    private lateinit var nameserver: String
 
     private val restTemplate = RestTemplate()
     private val gson = Gson()
@@ -31,7 +31,7 @@ class PowerDNSApiClient {
     fun createDomain(name: String): ResponseEntity<String> {
         val url = "$apiUrl/api/v1/servers/localhost/zones"
         val headers = createHeaders()
-        val domainRequest = DomainRequest("$name.", "Native", arrayOf(), ns.split(",").toTypedArray())
+        val domainRequest = DomainRequest("$name.", "Native", arrayOf(), nameserver.split(",").toTypedArray())
         val body = gson.toJson(domainRequest)
         val entity = HttpEntity(body, headers)
         return restTemplate.exchange(url, HttpMethod.POST, entity, String::class.java)
