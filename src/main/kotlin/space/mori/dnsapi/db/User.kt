@@ -1,9 +1,9 @@
 package space.mori.dnsapi.db
 
 import jakarta.persistence.*
-import org.springframework.security.core.context.SecurityContextHolder
 
 @Entity
+@Table(name = "api_users")
 data class User(
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)

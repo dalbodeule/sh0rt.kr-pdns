@@ -5,7 +5,7 @@ import java.util.*
 
 
 @Entity
-@Table(name = "domains")
+@Table(name = "api_domains")
 data class Domain(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

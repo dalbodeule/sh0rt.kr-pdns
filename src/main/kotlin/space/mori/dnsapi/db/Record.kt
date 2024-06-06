@@ -5,7 +5,7 @@ import java.util.*
 
 
 @Entity
-@Table(name = "records")
+@Table(name = "api_records")
 data class Record(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
