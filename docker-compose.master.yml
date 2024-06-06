@@ -85,6 +85,12 @@ services:
       DB_PASSWORD: ${MARIADB_PASSWORD}
       PDNS_API_URL: http://pdns:8081
       PDNS_API_KEY: ${PDNS_API_KEY}
+    depends_on:
+      - pdns
+      - mariadb
+    networks:
+      - pdns_network
+    restart: always
 
   nginx:
     image: jonasal/nginx-certbot:latest
