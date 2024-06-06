@@ -3,12 +3,10 @@ package space.mori.dnsapi.service
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import space.mori.dnsapi.PowerDNSApiClient
+import space.mori.dnsapi.PowerDNSAPIClient
 import space.mori.dnsapi.db.DomainRepository
 import space.mori.dnsapi.db.Record as DomainRecord
 import space.mori.dnsapi.db.RecordRepository
-import space.mori.dnsapi.db.UserRepository
-import space.mori.dnsapi.dto.DomainRequestDTO
 import space.mori.dnsapi.dto.RecordRequestDTO
 import space.mori.dnsapi.dto.RecordResponseDTO
 import space.mori.dnsapi.filter.getCurrentUser
@@ -19,13 +17,11 @@ import java.util.*
 @Service
 class RecordService(
     @Autowired
-    private val powerDNSApiClient: PowerDNSApiClient,
+    private val powerDNSApiClient: PowerDNSAPIClient,
     @Autowired
     private val domainRepository: DomainRepository,
     @Autowired
     private val recordRepository: RecordRepository,
-    @Autowired
-    private val userRepository: UserRepository,
 ) {
     fun createRecord(domain_id: String, recordRequest: RecordRequestDTO): RecordResponseDTO {
         val domain = domainRepository.findByCfid(domain_id).orElseThrow {
@@ -36,9 +32,9 @@ class RecordService(
         if(domain.user.id != user.id)
             throw RuntimeException("Unauthorized to create record in API: $domain_id")
 
-        val response = powerDNSApiClient.createRecord(domain.name, recordRequest)
-        if (!response.statusCode.is2xxSuccessful) {
-            throw RuntimeException("Failed to create record in PowerDNS: ${response.body}")
+        val response = powerDNSApiClient.createRecord(domain.name, recordRequest.name, recordRequest.type, recordRequest.content)
+        if (!response) {
+            throw RuntimeException("Failed to create record in PowerDNS")
         }
        val record = DomainRecord(
            domain = domain,
@@ -146,9 +142,9 @@ class RecordService(
         record.comment = updatedRecord.comment
         record.modifiedOn = Date()
 
-        val response = powerDNSApiClient.createRecord(domain!!.name, updatedRecord)
-        if (!response.statusCode.is2xxSuccessful) {
-            throw RuntimeException("Failed to update record in PowerDNS: ${response.body}")
+        val response = powerDNSApiClient.updateRecord(domain!!.name, updatedRecord.name, updatedRecord.type, updatedRecord.content)
+        if (!response) {
+            throw RuntimeException("Failed to update record in PowerDNS")
         }
 
         // 저장
@@ -179,9 +175,13 @@ class RecordService(
         if(domain.user.id != user.id)
             throw RuntimeException("Unauthorized to create record in API: $domain_id")
 
-        val deletedCount = recordRepository.deleteByDomainIdAndCfid(domain.id!!, record_id)
+        val record = recordRepository.findByDomainIdAndCfid(domain.id!!, record_id).orElseThrow {
+            RuntimeException("Failed to find record in API: $record_id")
+        }
 
-        if(deletedCount == 0) throw RuntimeException("Failed to find record in API: $record_id")
-        else return record_id
+        powerDNSApiClient.deleteRecord(domain.name, record.name, record.type)
+        recordRepository.deleteByDomainIdAndCfid(domain.id!!, record_id)
+
+        return record_id
     }
 }

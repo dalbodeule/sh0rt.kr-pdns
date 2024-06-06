@@ -2,7 +2,7 @@ package space.mori.dnsapi.service
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import space.mori.dnsapi.PowerDNSApiClient
+import space.mori.dnsapi.PowerDNSAPIClient
 import space.mori.dnsapi.db.Domain
 import space.mori.dnsapi.db.DomainRepository
 import space.mori.dnsapi.dto.DomainRequestDTO
@@ -14,7 +14,7 @@ class DomainService(
     @Autowired
     private val domainRepository: DomainRepository,
     @Autowired
-    private val powerDNSApiClient: PowerDNSApiClient
+    private val powerDNSApiClient: PowerDNSAPIClient
 ) {
     fun getAllDomains(): List<Domain> {
         val user = getCurrentUser()
@@ -38,7 +38,7 @@ class DomainService(
     fun createDomain(domain: DomainRequestDTO): Domain {
         val user = getCurrentUser()
 
-        powerDNSApiClient.createDomain(domain.name)
+        powerDNSApiClient.createZone(domain.name)
         val saved_domain = domainRepository.save(Domain(name=domain.name, user=user))
 
         return saved_domain
@@ -49,7 +49,7 @@ class DomainService(
             throw RuntimeException("Domain with CFID $domain_id not found")
         }
 
-        powerDNSApiClient.deleteDomain(domain.name)
+        powerDNSApiClient.deleteZone(domain.name)
         val count = domainRepository.deleteByCfid(domain_id)
 
         if(count > 0) throw RuntimeException("Domain with CFID $domain_id not found")

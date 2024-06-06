@@ -42,6 +42,9 @@ dependencies {
 	implementation("com.google.code.gson:gson:2.11.0")
 	implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
 
+	// https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
+	implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
 	runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

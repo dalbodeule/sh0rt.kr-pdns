@@ -1,14 +1,15 @@
 package space.mori.dnsapi
 
 import com.google.gson.Gson
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.*
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestTemplate
-import space.mori.dnsapi.dto.RecordRequestDTO
 
 @Service
-class PowerDNSApiClient {
+class PowerDNSAPIClient() {
     @Value("\${pdns.api.url}")
     private lateinit var apiUrl: String
 
@@ -18,68 +19,73 @@ class PowerDNSApiClient {
     @Value("\${pdns.ns}")
     private lateinit var nameserver: String
 
-    private val restTemplate = RestTemplate()
     private val gson = Gson()
+    private val client = OkHttpClient()
 
-    private fun createHeaders(): HttpHeaders {
-        val headers = HttpHeaders()
-        headers.set("X-API-Key", apiKey)
-        headers.contentType = MediaType.APPLICATION_JSON
-        return headers
+    fun createZone(zoneName: String): Boolean {
+        val body = gson.toJson(mapOf(
+            "name" to zoneName,
+            "nameservers" to nameserver.split(","))
+        ).toRequestBody("application/json; charset=utf-8".toMediaType())
+        val request = Request.Builder()
+            .url("$apiUrl/api/v1/servers/localhost/zones")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .post(body)
+            .build()
+
+        val response = client.newCall(request).execute()
+        return response.isSuccessful
     }
 
-    fun createDomain(name: String): ResponseEntity<String> {
-        val url = "$apiUrl/api/v1/servers/localhost/zones"
-        val headers = createHeaders()
-        val domainRequest = DomainRequest("$name.", "Native", arrayOf(), nameserver.split(",").toTypedArray())
-        val body = gson.toJson(domainRequest)
-        val entity = HttpEntity(body, headers)
-        return restTemplate.exchange(url, HttpMethod.POST, entity, String::class.java)
+    fun deleteZone(zoneName: String): Boolean {
+        val request = Request.Builder()
+            .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .delete()
+            .build()
+
+        val response = client.newCall(request).execute()
+        return response.isSuccessful
     }
 
-    fun createRecord(domainName: String, recordRequest: RecordRequestDTO): ResponseEntity<String> {
-        val url = "$apiUrl/api/v1/servers/localhost/zones/$domainName."
-        val headers = createHeaders()
-        val record = RecordRequest(
-            name = "${recordRequest.name}.$domainName.",
-            type = recordRequest.type,
-            ttl = recordRequest.ttl,
-            changetype = "REPLACE",
-            records = arrayOf(RecordContent(recordRequest.content, false))
-        )
-        val body = gson.toJson(RecordRequestWrapper(arrayOf(record)))
-        val entity = HttpEntity(body, headers)
-        return restTemplate.exchange(url, HttpMethod.PATCH, entity, String::class.java)
+    fun createRecord(zoneName: String, recordName: String, recordType: String, recordContent: String): Boolean {
+        val body = gson.toJson(mapOf(
+            "name" to recordName,
+            "type" to recordType,
+            "content" to recordContent
+        )).toRequestBody("application/json; charset=utf-8".toMediaType())
+        val request = Request.Builder()
+            .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName/records")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .post(body)
+            .build()
+
+        val response = client.newCall(request).execute()
+        return response.isSuccessful
     }
 
-    fun deleteDomain(name: String): ResponseEntity<String> {
-        val url = "$apiUrl/api/v1/servers/localhost/zones/$name."
-        val headers = createHeaders()
-        val entity = HttpEntity<String>(headers)
-        return restTemplate.exchange(url, HttpMethod.DELETE, entity, String::class.java)
+    fun updateRecord(zoneName: String, recordName: String, recordType: String, recordContent: String): Boolean {
+        val body = gson.toJson(mapOf(
+            "content" to recordContent
+        )).toRequestBody("application/json; charset=utf-8".toMediaType())
+        val request = Request.Builder()
+            .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName/records/$recordName/$recordType")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .put(body)
+            .build()
+
+        val response = client.newCall(request).execute()
+        return response.isSuccessful
     }
 
-    private data class DomainRequest(
-        val name: String,
-        val kind: String,
-        val masters: Array<String>,
-        val nameservers: Array<String>
-    )
+    fun deleteRecord(zoneName: String, recordName: String, recordType: String): Boolean {
+        val request = Request.Builder()
+            .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName/records/$recordName/$recordType")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .delete()
+            .build()
 
-    private data class RecordRequestWrapper(
-        val rrsets: Array<RecordRequest>
-    )
-
-    private data class RecordRequest(
-        val name: String,
-        val type: String,
-        val ttl: Int,
-        val changetype: String,
-        val records: Array<RecordContent>
-    )
-
-    private data class RecordContent(
-        val content: String,
-        val disabled: Boolean
-    )
+        val response = client.newCall(request).execute()
+        return response.isSuccessful
+    }
 }
