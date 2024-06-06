@@ -61,14 +61,11 @@ tasks.withType<Test> {
 }
 
 tasks.withType<BootBuildImage> {
-	val imageNames = "dalbodeule/dnsapi"
-
 	val dockerId = System.getenv("DOCKER_ID")
 	val dockerPw = System.getenv("docker_pw")
 
-
-	imageName = imageNames
-	tags.set(setOf("$imageNames:latest", "$imageNames:${datetimeFormatter.format(LocalDateTime.now())}"))
+	imageName.set("dalbodeule/dnsapi")
+	tags.set(setOf("latest", datetimeFormatter.format(LocalDateTime.now())))
 	buildpacks.set(setOf("docker.io/paketobuildpacks/oracle", "urn:cnb:builder:paketo-buildpacks/java-native-image"))
 
 	environment = mapOf(
