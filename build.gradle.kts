@@ -61,15 +61,8 @@ tasks.withType<Test> {
 }
 
 tasks.withType<BootBuildImage> {
-	val dockerId = System.getenv("DOCKER_ID")
-	val dockerPw = System.getenv("docker_pw")
-
 	docker {
 		publish = true
-		publishRegistry {
-			username = dockerId
-			password = dockerPw
-		}
 	}
 
 	imageName.set("dalbodeule/dnsapi")
