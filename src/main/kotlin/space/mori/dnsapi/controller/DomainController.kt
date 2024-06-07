@@ -6,7 +6,9 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 import space.mori.dnsapi.PowerDNSAPIError
 import space.mori.dnsapi.db.Domain
 import space.mori.dnsapi.dto.*
@@ -32,7 +34,10 @@ class DomainController(
         } catch(e : PowerDNSAPIError) {
             val errors = mutableListOf(e.error)
             errors.addAll(e.errors)
-            return ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) })
+            throw ResponseStatusException(
+                HttpStatus.EXPECTATION_FAILED,
+                ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) }, result = listOf(null)).toString()
+            )
         }
     }
 
@@ -51,7 +56,9 @@ class DomainController(
         } catch(e : PowerDNSAPIError) {
             val errors = mutableListOf(e.error)
             errors.addAll(e.errors)
-            return ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) })
+            throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
+                ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) }, result = listOf(null)).toString()
+            )
         }
     }
 
@@ -68,7 +75,9 @@ class DomainController(
         } catch(e : PowerDNSAPIError) {
             val errors = mutableListOf(e.error)
             errors.addAll(e.errors)
-            return ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) })
+            throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
+                ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) }, result = listOf(null)).toString()
+            )
         }
     }
 
@@ -87,7 +96,9 @@ class DomainController(
         } catch(e : PowerDNSAPIError) {
             val errors = mutableListOf(e.error)
             errors.addAll(e.errors)
-            return ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) })
+            throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
+                ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) }, result = listOf(null)).toString()
+            )
         }
     }
 
