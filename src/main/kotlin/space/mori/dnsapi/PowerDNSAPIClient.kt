@@ -6,7 +6,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import okhttp3.internal.concat
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
@@ -39,8 +38,7 @@ class PowerDNSAPIClient() {
 
         val response = client.newCall(request).execute()
         if(!response.isSuccessful) {
-            val error = gson.fromJson(response.body?.string(), Error::class.java)
-            throw RuntimeException("Unexpected code ${error.error}, ${error.errors.concat(", ")}")
+            throw gson.fromJson(response.body?.string(), Error::class.java)
         }
         return response
     }
@@ -56,8 +54,7 @@ class PowerDNSAPIClient() {
 
         val response = client.newCall(request).execute()
         if(!response.isSuccessful) {
-            val error = gson.fromJson(response.body?.string(), Error::class.java)
-            throw RuntimeException("Unexpected code ${error.error}, ${error.errors.concat(", ")}")
+            throw gson.fromJson(response.body?.string(), Error::class.java)
         }
         return response
     }
@@ -78,8 +75,7 @@ class PowerDNSAPIClient() {
 
         val response = client.newCall(request).execute()
         if(!response.isSuccessful) {
-            val error = gson.fromJson(response.body?.string(), Error::class.java)
-            throw RuntimeException("Unexpected code ${error.error}, ${error.errors.concat(", ")}")
+            throw gson.fromJson(response.body?.string(), Error::class.java)
         }
         return response
     }
@@ -98,8 +94,7 @@ class PowerDNSAPIClient() {
 
         val response = client.newCall(request).execute()
         if(!response.isSuccessful) {
-            val error = gson.fromJson(response.body?.string(), Error::class.java)
-            throw RuntimeException("Unexpected code ${error.error}, ${error.errors.concat(", ")}")
+            throw gson.fromJson(response.body?.string(), Error::class.java)
         }
         return response
     }
@@ -115,11 +110,10 @@ class PowerDNSAPIClient() {
 
         val response = client.newCall(request).execute()
         if(!response.isSuccessful) {
-            val error = gson.fromJson(response.body?.string(), Error::class.java)
-            throw RuntimeException("Unexpected code ${error.error}, ${error.errors.concat(", ")}")
+            throw gson.fromJson(response.body?.string(), Error::class.java)
         }
         return response
     }
 }
 
-data class Error(val error: String, val errors: Array<String>)
+data class PowerDNSAPIError(val error: String, val errors: List<String>): RuntimeException(error)

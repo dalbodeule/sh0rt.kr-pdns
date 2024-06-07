@@ -7,9 +7,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
+import space.mori.dnsapi.PowerDNSAPIError
 import space.mori.dnsapi.dto.*
-import space.mori.dnsapi.db.Record as DomainRecord
-import space.mori.dnsapi.getISOFormat
 import space.mori.dnsapi.service.RecordService
 
 @RestController
@@ -26,7 +25,13 @@ class RecordController(
             content = [Content(schema = Schema(implementation = ApiResponseDTO::class))]),
     ])
     fun allRecords(@PathVariable zone_id: String): ApiResponseDTO<List<RecordResponseDTO>> {
-        return ApiResponseDTO(result = recordService.getRecordsByDomain(zone_id)?.map{ it } ?: listOf())
+        try {
+            return ApiResponseDTO(result = recordService.getRecordsByDomain(zone_id)?.map{ it } ?: listOf())
+        } catch(e : PowerDNSAPIError) {
+            val errors = mutableListOf(e.error)
+            errors.addAll(e.errors)
+            return ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) })
+        }
     }
 
     @GetMapping("{zone_id}/dns_records/{dns_record_id}")
@@ -37,7 +42,13 @@ class RecordController(
             content = [Content(schema = Schema(implementation = ApiResponseDTO::class))]),
     ])
     fun getRecordByCfid(@PathVariable zone_id: String, @PathVariable dns_record_id: String): ApiResponseDTO<RecordResponseDTO> {
-        return ApiResponseDTO(result = recordService.getRecord(zone_id, dns_record_id))
+        try {
+            return ApiResponseDTO(result = recordService.getRecord(zone_id, dns_record_id))
+        } catch(e : PowerDNSAPIError) {
+            val errors = mutableListOf(e.error)
+            errors.addAll(e.errors)
+            return ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) })
+        }
     }
 
     @PostMapping("{zone_id}/dns_records")
@@ -48,7 +59,13 @@ class RecordController(
             content = [Content(schema = Schema(implementation = ApiResponseDTO::class))]),
     ])
     fun createRecord(@PathVariable zone_id: String, @RequestBody record: RecordRequestDTO): ApiResponseDTO<RecordResponseDTO> {
-        return ApiResponseDTO(result = recordService.createRecord(zone_id, record))
+        try {
+            return ApiResponseDTO(result = recordService.createRecord(zone_id, record))
+        } catch(e : PowerDNSAPIError) {
+            val errors = mutableListOf(e.error)
+            errors.addAll(e.errors)
+            return ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) })
+        }
     }
 
     @DeleteMapping("{zone_id}/dns_records/{dns_record_id}")
@@ -59,8 +76,14 @@ class RecordController(
             content = [Content(schema = Schema(implementation = ApiResponseDTO::class))]),
     ])
     fun deleteRecord(@PathVariable zone_id: String, @PathVariable dns_record_id: String): ApiResponseDTO<DeleteResponseWithId> {
-        val record_id = recordService.deleteRecord(zone_id, dns_record_id)
-        return ApiResponseDTO(result = DeleteResponseWithId(record_id))
+        try {
+            val record_id = recordService.deleteRecord(zone_id, dns_record_id)
+            return ApiResponseDTO(result = DeleteResponseWithId(record_id))
+        } catch(e : PowerDNSAPIError) {
+            val errors = mutableListOf(e.error)
+            errors.addAll(e.errors)
+            return ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) })
+        }
     }
 
     @PatchMapping("{zone_id}/dns_records/{dns_record_id}")
@@ -71,20 +94,12 @@ class RecordController(
             content = [Content(schema = Schema(implementation = ApiResponseDTO::class))]),
     ])
     fun updateRecord(@PathVariable zone_id: String, @PathVariable dns_record_id: String, @RequestBody record: RecordRequestDTO): ApiResponseDTO<RecordResponseDTO> {
-        return ApiResponseDTO(result = recordService.updateRecord(zone_id, dns_record_id, record))
+        try {
+            return ApiResponseDTO(result = recordService.updateRecord(zone_id, dns_record_id, record))
+        } catch(e : PowerDNSAPIError) {
+            val errors = mutableListOf(e.error)
+            errors.addAll(e.errors)
+            return ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) })
+        }
     }
-
-    private fun DomainRecord.toDTO() = RecordResponseDTO(
-        id = cfid,
-        type = type,
-        name = name,
-        content = content,
-        zoneId = domain.cfid,
-        zoneName = domain.name,
-        priority = prio,
-        ttl = ttl,
-        createdOn = createdOn.getISOFormat(),
-        modifiedOn = modifiedOn.getISOFormat(),
-        comment = comment
-    )
 }

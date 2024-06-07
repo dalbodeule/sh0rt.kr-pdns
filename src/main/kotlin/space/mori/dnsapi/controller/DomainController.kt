@@ -7,12 +7,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
+import space.mori.dnsapi.PowerDNSAPIError
 import space.mori.dnsapi.db.Domain
-import space.mori.dnsapi.dto.ApiResponseDTO
-import space.mori.dnsapi.dto.DeleteResponseWithId
-import space.mori.dnsapi.dto.DomainRequestDTO
-import space.mori.dnsapi.dto.DomainResponseDTO
-import space.mori.dnsapi.filter.getCurrentUser
+import space.mori.dnsapi.dto.*
 import space.mori.dnsapi.service.DomainService
 
 
@@ -30,7 +27,13 @@ class DomainController(
             content = [Content(schema = Schema(implementation = ApiResponseDTO::class))])
     ])
     fun allDomains(): ApiResponseDTO<List<DomainResponseDTO?>> {
-        return ApiResponseDTO(result = domainService.getAllDomains().map { it.toDTO() })
+        try {
+            return ApiResponseDTO(result = domainService.getAllDomains().map { it.toDTO() })
+        } catch(e : PowerDNSAPIError) {
+            val errors = mutableListOf(e.error)
+            errors.addAll(e.errors)
+            return ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) })
+        }
     }
 
     @Operation(summary = "Get domain", tags = ["domain"])
@@ -43,7 +46,13 @@ class DomainController(
     fun getDomainByCfid(
         @PathVariable cfid: String?
     ): ApiResponseDTO<DomainResponseDTO> {
-        return ApiResponseDTO(result = domainService.getDomainById(cfid!!).toDTO())
+        try {
+            return ApiResponseDTO(result = domainService.getDomainById(cfid!!).toDTO())
+        } catch(e : PowerDNSAPIError) {
+            val errors = mutableListOf(e.error)
+            errors.addAll(e.errors)
+            return ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) })
+        }
     }
 
     @Operation(summary = "Create domain", tags = ["domain"])
@@ -54,7 +63,13 @@ class DomainController(
     ])
     @PostMapping
     fun createDomain(@RequestBody domain: DomainRequestDTO): ApiResponseDTO<DomainResponseDTO> {
-        return ApiResponseDTO(result = domainService.createDomain(domain).toDTO())
+        try {
+            return ApiResponseDTO(result = domainService.createDomain(domain).toDTO())
+        } catch(e : PowerDNSAPIError) {
+            val errors = mutableListOf(e.error)
+            errors.addAll(e.errors)
+            return ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) })
+        }
     }
 
     @Operation(summary = "Delete domain", tags = ["domain"])
@@ -65,9 +80,15 @@ class DomainController(
     ])
     @DeleteMapping("/{domain_id}")
     fun deleteDomain(@PathVariable domain_id: String?): ApiResponseDTO<DeleteResponseWithId> {
-        domainService.deleteDomain(domain_id!!)
+        try {
+            domainService.deleteDomain(domain_id!!)
 
-        return ApiResponseDTO(result=DeleteResponseWithId(domain_id))
+            return ApiResponseDTO(result = DeleteResponseWithId(domain_id))
+        } catch(e : PowerDNSAPIError) {
+            val errors = mutableListOf(e.error)
+            errors.addAll(e.errors)
+            return ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) })
+        }
     }
 
     private fun Domain.toDTO() = DomainResponseDTO(id = cfid, name = name)
