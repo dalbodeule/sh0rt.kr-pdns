@@ -30,11 +30,14 @@ class RecordController(
         try {
             return ApiResponseDTO(result = recordService.getRecordsByDomain(zone_id)?.map{ it } ?: listOf())
         } catch(e : PowerDNSAPIException) {
-            val errors = mutableListOf(e.message)
-            errors.addAll(e.errors)
             var idx = 0
+            val errors = mutableListOf(ErrorOrMessage(idx, e.message ?: ""))
+            e.errors.forEach{
+                errors.add(ErrorOrMessage(idx++, it))
+            }
+
             throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
-                ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(idx++, it ?: "") }, result = listOf(null)).toString()
+                ApiResponseDTO(false, errors = errors, result = listOf(null)).toString()
             )
         }
     }
@@ -50,11 +53,14 @@ class RecordController(
         try {
             return ApiResponseDTO(result = recordService.getRecord(zone_id, dns_record_id))
         } catch(e : PowerDNSAPIException) {
-            val errors = mutableListOf(e.message)
-            errors.addAll(e.errors)
             var idx = 0
+            val errors = mutableListOf(ErrorOrMessage(idx, e.message ?: ""))
+            e.errors.forEach{
+                errors.add(ErrorOrMessage(idx++, it))
+            }
+
             throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
-                ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(idx++, it ?: "") }, result = listOf(null)).toString()
+                ApiResponseDTO(false, errors = errors, result = listOf(null)).toString()
             )
         }
     }
@@ -70,11 +76,14 @@ class RecordController(
         try {
             return ApiResponseDTO(result = recordService.createRecord(zone_id, record))
         } catch(e : PowerDNSAPIException) {
-            val errors = mutableListOf(e.message)
-            errors.addAll(e.errors)
             var idx = 0
+            val errors = mutableListOf(ErrorOrMessage(idx, e.message ?: ""))
+            e.errors.forEach{
+                errors.add(ErrorOrMessage(idx++, it))
+            }
+
             throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
-                ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(idx++, it ?: "") }, result = listOf(null)).toString()
+                ApiResponseDTO(false, errors = errors, result = listOf(null)).toString()
             )
         }
     }
@@ -91,11 +100,14 @@ class RecordController(
             val record_id = recordService.deleteRecord(zone_id, dns_record_id)
             return ApiResponseDTO(result = DeleteResponseWithId(record_id))
         } catch(e : PowerDNSAPIException) {
-            val errors = mutableListOf(e.message)
-            errors.addAll(e.errors)
             var idx = 0
+            val errors = mutableListOf(ErrorOrMessage(idx, e.message ?: ""))
+            e.errors.forEach{
+                errors.add(ErrorOrMessage(idx++, it))
+            }
+
             throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
-                ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(idx++, it ?: "") }, result = listOf(null)).toString()
+                ApiResponseDTO(false, errors = errors, result = listOf(null)).toString()
             )
         }
     }
@@ -111,11 +123,14 @@ class RecordController(
         try {
             return ApiResponseDTO(result = recordService.updateRecord(zone_id, dns_record_id, record))
         } catch(e : PowerDNSAPIException) {
-            val errors = mutableListOf(e.message)
-            errors.addAll(e.errors)
             var idx = 0
+            val errors = mutableListOf(ErrorOrMessage(idx, e.message ?: ""))
+            e.errors.forEach{
+                errors.add(ErrorOrMessage(idx++, it))
+            }
+
             throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
-                ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(idx++, it ?: "") }, result = listOf(null)).toString()
+                ApiResponseDTO(false, errors = errors, result = listOf(null)).toString()
             )
         }
     }
