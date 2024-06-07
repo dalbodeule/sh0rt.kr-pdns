@@ -12,10 +12,23 @@ class GlobalExceptionHandler {
     @ExceptionHandler(PowerDNSAPIException::class)
     fun handlePowerDNSAPIException(ex: PowerDNSAPIException): ResponseEntity<ApiResponseDTO<Nothing>> {
         var idx = 0
-        val errors = mutableListOf(ErrorOrMessage(idx, ex.message ?: ""))
+        val errors = mutableListOf(ErrorOrMessage(idx, ex.message ?: "PowerDNSAPIException"))
         ex.errors?.forEach{
             errors.add(ErrorOrMessage(idx++, it))
         }
+
+        val response = ApiResponseDTO(
+            success = false,
+            errors = errors,
+            result = null
+        )
+
+        return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response)
+    }
+
+    @ExceptionHandler(Throwable::class)
+    fun handleException(ex: Throwable): ResponseEntity<ApiResponseDTO<Nothing>> {
+        val errors = mutableListOf(ErrorOrMessage(0, ex.message ?: "Error"))
 
         val response = ApiResponseDTO(
             success = false,
