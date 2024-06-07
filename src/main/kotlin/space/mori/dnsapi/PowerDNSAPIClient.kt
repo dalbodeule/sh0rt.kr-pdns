@@ -20,18 +20,14 @@ class PowerDNSAPIClient() {
     @Value("\${pdns.api.key}")
     private lateinit var apiKey: String
 
-    @Value("\${pdns.ns}")
-    private lateinit var nameserver: String
-
     private val gson = Gson()
     private val client = OkHttpClient()
 
     @Throws(PowerDNSAPIException::class)
     fun createZone(zoneName: String): Response {
         val body = gson.toJson(mapOf(
-            "name" to "$zoneName.",
-            "nameservers" to nameserver.split(","))
-        ).toRequestBody()
+            "name" to "$zoneName."
+        )).toRequestBody()
         val request = Request.Builder()
             .url("$apiUrl/api/v1/servers/localhost/zones")
             .addHeader("X-API-Key", apiKey)
