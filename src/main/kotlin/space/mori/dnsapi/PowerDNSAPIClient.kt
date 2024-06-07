@@ -27,7 +27,7 @@ class PowerDNSAPIClient() {
         val body = gson.toJson(mapOf(
             "name" to zoneName,
             "nameservers" to nameserver.split(","))
-        ).toRequestBody("application/json; charset=utf-8".toMediaType())
+        ).toRequestBody("application/json".toMediaType())
         val request = Request.Builder()
             .url("$apiUrl/api/v1/servers/localhost/zones")
             .addHeader("X-API-Key", apiKey)
@@ -56,7 +56,7 @@ class PowerDNSAPIClient() {
             "name" to recordName,
             "type" to recordType,
             "content" to recordContent
-        )).toRequestBody("application/json; charset=utf-8".toMediaType())
+        )).toRequestBody("application/json".toMediaType())
         val request = Request.Builder()
             .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName/records")
             .addHeader("X-API-Key", apiKey)
@@ -71,7 +71,7 @@ class PowerDNSAPIClient() {
     fun updateRecord(zoneName: String, recordName: String, recordType: String, recordContent: String): Response {
         val body = gson.toJson(mapOf(
             "content" to recordContent
-        )).toRequestBody("application/json; charset=utf-8".toMediaType())
+        )).toRequestBody("application/json".toMediaType())
         val request = Request.Builder()
             .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName/records/$recordName/$recordType")
             .addHeader("X-API-Key", apiKey)
