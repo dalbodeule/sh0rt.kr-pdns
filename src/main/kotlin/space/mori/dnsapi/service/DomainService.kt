@@ -17,42 +17,59 @@ class DomainService(
     private val powerDNSApiClient: PowerDNSAPIClient
 ) {
     fun getAllDomains(): List<Domain> {
-        val user = getCurrentUser()
-        val domain = domainRepository.findAllByUser(user)
-        if(domain.isEmpty()) throw RuntimeException("Unauthorized")
+        try {
+            val user = getCurrentUser()
+            val domain = domainRepository.findAllByUser(user)
+            if (domain.isEmpty()) throw RuntimeException("Unauthorized")
 
-        return domain
+            return domain
+        } catch(ex: Error) {
+            throw ex
+        }
     }
 
     fun getDomainById(domain_id: String): Domain {
-        val domain = domainRepository.findByCfid(domain_id).orElseThrow {
-            RuntimeException("Failed to find domain in API: $domain_id")
-        }
-        val user = getCurrentUser()
-        if(domain.user.id != user.id)
-            throw RuntimeException("Unauthorized to create record in API: $domain_id")
+        try {
+            val domain = domainRepository.findByCfid(domain_id).orElseThrow {
+                RuntimeException("Failed to find domain in API: $domain_id")
+            }
+            val user = getCurrentUser()
+            if (domain.user.id != user.id)
+                throw RuntimeException("Unauthorized to create record in API: $domain_id")
 
-        return domain
+            return domain
+        } catch(ex: Error) {
+            throw ex
+        }
     }
 
+    @Throws(Exception::class)
     fun createDomain(domain: DomainRequestDTO): Domain {
-        val user = getCurrentUser()
+        try {
+            val user = getCurrentUser()
 
-        powerDNSApiClient.createZone(domain.name)
-        val saved_domain = domainRepository.save(Domain(name=domain.name, user=user))
+            powerDNSApiClient.createZone(domain.name)
+            val saved_domain = domainRepository.save(Domain(name = domain.name, user = user))
 
-        return saved_domain
+            return saved_domain
+        } catch(ex: Error) {
+            throw ex
+        }
     }
 
     fun deleteDomain(domain_id: String): String {
-        val domain = domainRepository.findByCfid(domain_id).orElseThrow {
-            throw RuntimeException("Domain with CFID $domain_id not found")
+        try {
+            val domain = domainRepository.findByCfid(domain_id).orElseThrow {
+                throw RuntimeException("Domain with CFID $domain_id not found")
+            }
+
+            powerDNSApiClient.deleteZone(domain.name)
+            val count = domainRepository.deleteByCfid(domain_id)
+
+            if (count > 0) throw RuntimeException("Domain with CFID $domain_id not found")
+            return domain_id
+        } catch(ex: Error) {
+            throw ex
         }
-
-        powerDNSApiClient.deleteZone(domain.name)
-        val count = domainRepository.deleteByCfid(domain_id)
-
-        if(count > 0) throw RuntimeException("Domain with CFID $domain_id not found")
-        return domain_id
     }
 }

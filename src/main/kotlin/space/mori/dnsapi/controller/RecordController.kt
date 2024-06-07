@@ -6,10 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.ResponseStatusException
-import space.mori.dnsapi.PowerDNSAPIException
 import space.mori.dnsapi.dto.*
 import space.mori.dnsapi.service.RecordService
 
@@ -27,19 +24,7 @@ class RecordController(
             content = [Content(schema = Schema(implementation = ApiResponseDTO::class))]),
     ])
     fun allRecords(@PathVariable zone_id: String): ApiResponseDTO<List<RecordResponseDTO>> {
-        try {
-            return ApiResponseDTO(result = recordService.getRecordsByDomain(zone_id)?.map{ it } ?: listOf())
-        } catch(e : PowerDNSAPIException) {
-            var idx = 0
-            val errors = mutableListOf(ErrorOrMessage(idx, e.message ?: ""))
-            e.errors.forEach{
-                errors.add(ErrorOrMessage(idx++, it))
-            }
-
-            throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
-                ApiResponseDTO(false, errors = errors, result = listOf(null)).toString()
-            )
-        }
+        return ApiResponseDTO(result = recordService.getRecordsByDomain(zone_id)?.map{ it } ?: listOf())
     }
 
     @GetMapping("{zone_id}/dns_records/{dns_record_id}")
@@ -50,19 +35,7 @@ class RecordController(
             content = [Content(schema = Schema(implementation = ApiResponseDTO::class))]),
     ])
     fun getRecordByCfid(@PathVariable zone_id: String, @PathVariable dns_record_id: String): ApiResponseDTO<RecordResponseDTO> {
-        try {
-            return ApiResponseDTO(result = recordService.getRecord(zone_id, dns_record_id))
-        } catch(e : PowerDNSAPIException) {
-            var idx = 0
-            val errors = mutableListOf(ErrorOrMessage(idx, e.message ?: ""))
-            e.errors.forEach{
-                errors.add(ErrorOrMessage(idx++, it))
-            }
-
-            throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
-                ApiResponseDTO(false, errors = errors, result = listOf(null)).toString()
-            )
-        }
+        return ApiResponseDTO(result = recordService.getRecord(zone_id, dns_record_id))
     }
 
     @PostMapping("{zone_id}/dns_records")
@@ -73,19 +46,7 @@ class RecordController(
             content = [Content(schema = Schema(implementation = ApiResponseDTO::class))]),
     ])
     fun createRecord(@PathVariable zone_id: String, @RequestBody record: RecordRequestDTO): ApiResponseDTO<RecordResponseDTO> {
-        try {
-            return ApiResponseDTO(result = recordService.createRecord(zone_id, record))
-        } catch(e : PowerDNSAPIException) {
-            var idx = 0
-            val errors = mutableListOf(ErrorOrMessage(idx, e.message ?: ""))
-            e.errors.forEach{
-                errors.add(ErrorOrMessage(idx++, it))
-            }
-
-            throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
-                ApiResponseDTO(false, errors = errors, result = listOf(null)).toString()
-            )
-        }
+        return ApiResponseDTO(result = recordService.createRecord(zone_id, record))
     }
 
     @DeleteMapping("{zone_id}/dns_records/{dns_record_id}")
@@ -96,20 +57,8 @@ class RecordController(
             content = [Content(schema = Schema(implementation = ApiResponseDTO::class))]),
     ])
     fun deleteRecord(@PathVariable zone_id: String, @PathVariable dns_record_id: String): ApiResponseDTO<DeleteResponseWithId> {
-        try {
-            val record_id = recordService.deleteRecord(zone_id, dns_record_id)
-            return ApiResponseDTO(result = DeleteResponseWithId(record_id))
-        } catch(e : PowerDNSAPIException) {
-            var idx = 0
-            val errors = mutableListOf(ErrorOrMessage(idx, e.message ?: ""))
-            e.errors.forEach{
-                errors.add(ErrorOrMessage(idx++, it))
-            }
-
-            throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
-                ApiResponseDTO(false, errors = errors, result = listOf(null)).toString()
-            )
-        }
+        val record_id = recordService.deleteRecord(zone_id, dns_record_id)
+        return ApiResponseDTO(result = DeleteResponseWithId(record_id))
     }
 
     @PatchMapping("{zone_id}/dns_records/{dns_record_id}")
@@ -120,18 +69,6 @@ class RecordController(
             content = [Content(schema = Schema(implementation = ApiResponseDTO::class))]),
     ])
     fun updateRecord(@PathVariable zone_id: String, @PathVariable dns_record_id: String, @RequestBody record: RecordRequestDTO): ApiResponseDTO<RecordResponseDTO> {
-        try {
-            return ApiResponseDTO(result = recordService.updateRecord(zone_id, dns_record_id, record))
-        } catch(e : PowerDNSAPIException) {
-            var idx = 0
-            val errors = mutableListOf(ErrorOrMessage(idx, e.message ?: ""))
-            e.errors.forEach{
-                errors.add(ErrorOrMessage(idx++, it))
-            }
-
-            throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
-                ApiResponseDTO(false, errors = errors, result = listOf(null)).toString()
-            )
-        }
+        return ApiResponseDTO(result = recordService.updateRecord(zone_id, dns_record_id, record))
     }
 }

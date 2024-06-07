@@ -95,6 +95,7 @@ services:
 
   nginx:
     image: jonasal/nginx-certbot:latest
+    container_name: pdns-nginx
     restart: always
     environment:
       CERTBOT_EMAIL: ${CERTBOT_EMAIL}

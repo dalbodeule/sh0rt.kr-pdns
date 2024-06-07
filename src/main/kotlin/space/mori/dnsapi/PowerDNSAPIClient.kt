@@ -29,7 +29,7 @@ class PowerDNSAPIClient() {
     @Throws(PowerDNSAPIException::class)
     fun createZone(zoneName: String): Response {
         val body = gson.toJson(mapOf(
-            "name" to zoneName,
+            "name" to "$zoneName.",
             "nameservers" to nameserver.split(","))
         ).toRequestBody()
         val request = Request.Builder()
@@ -51,7 +51,7 @@ class PowerDNSAPIClient() {
     @Throws(PowerDNSAPIException::class)
     fun deleteZone(zoneName: String): Response {
         val request = Request.Builder()
-            .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName")
+            .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName.")
             .addHeader("X-API-Key", apiKey)
             .addHeader("Accept", "application/json")
             .addHeader("Content-Type", "application/json")
@@ -74,7 +74,7 @@ class PowerDNSAPIClient() {
             "content" to recordContent
         )).toRequestBody("application/json".toMediaType())
         val request = Request.Builder()
-            .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName/records")
+            .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName./records")
             .addHeader("X-API-Key", apiKey)
             .addHeader("Accept", "application/json")
             .addHeader("Content-Type", "application/json")
@@ -95,7 +95,7 @@ class PowerDNSAPIClient() {
             "content" to recordContent
         )).toRequestBody("application/json".toMediaType())
         val request = Request.Builder()
-            .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName/records/$recordName/$recordType")
+            .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName./records/$recordName/$recordType")
             .addHeader("X-API-Key", apiKey)
             .addHeader("Accept", "application/json")
             .addHeader("Content-Type", "application/json")
@@ -113,7 +113,7 @@ class PowerDNSAPIClient() {
     @Throws(PowerDNSAPIException::class)
     fun deleteRecord(zoneName: String, recordName: String, recordType: String): Response {
         val request = Request.Builder()
-            .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName/records/$recordName/$recordType")
+            .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName./records/$recordName/$recordType")
             .addHeader("X-API-Key", apiKey)
             .addHeader("Accept", "application/json")
             .addHeader("Content-Type", "application/json")
@@ -132,7 +132,7 @@ class PowerDNSAPIClient() {
 @ReflectiveAccess
 data class PowerDNSAPIError(
     @SerializedName("error") val error: String,
-    @SerializedName("errors") val errors: List<String>
+    @SerializedName("errors") val errors: List<String>?
 )
 
 class PowerDNSAPIErrorDeserializer : JsonDeserializer<PowerDNSAPIError?> {
@@ -150,6 +150,8 @@ class PowerDNSAPIErrorDeserializer : JsonDeserializer<PowerDNSAPIError?> {
 }
 
 class PowerDNSAPIException(private val error: PowerDNSAPIError): RuntimeException(error.error) {
-    val errors: List<String>
+    val errors: List<String>?
         get() = error.errors
+
+    override fun toString(): String = "PowerDNSAPIException(${error.error} ${errors?.joinToString(", ") ?: ""})"
 }

@@ -6,10 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.ResponseStatusException
-import space.mori.dnsapi.PowerDNSAPIException
 import space.mori.dnsapi.db.Domain
 import space.mori.dnsapi.dto.*
 import space.mori.dnsapi.service.DomainService
@@ -29,19 +26,7 @@ class DomainController(
             content = [Content(schema = Schema(implementation = ApiResponseDTO::class))])
     ])
     fun allDomains(): ApiResponseDTO<List<DomainResponseDTO?>> {
-        try {
-            return ApiResponseDTO(result = domainService.getAllDomains().map { it.toDTO() })
-        } catch(e : PowerDNSAPIException) {
-            var idx = 0
-            val errors = mutableListOf(ErrorOrMessage(idx, e.message ?: ""))
-            e.errors.forEach{
-                errors.add(ErrorOrMessage(idx++, it))
-            }
-
-            throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
-                ApiResponseDTO(false, errors = errors, result = listOf(null)).toString()
-            )
-        }
+        return ApiResponseDTO(result = domainService.getAllDomains().map { it.toDTO() })
     }
 
     @Operation(summary = "Get domain", tags = ["domain"])
@@ -54,19 +39,7 @@ class DomainController(
     fun getDomainByCfid(
         @PathVariable cfid: String?
     ): ApiResponseDTO<DomainResponseDTO> {
-        try {
-            return ApiResponseDTO(result = domainService.getDomainById(cfid!!).toDTO())
-        } catch(e : PowerDNSAPIException) {
-            var idx = 0
-            val errors = mutableListOf(ErrorOrMessage(idx, e.message ?: ""))
-            e.errors.forEach{
-                errors.add(ErrorOrMessage(idx++, it))
-            }
-
-            throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
-                ApiResponseDTO(false, errors = errors, result = listOf(null)).toString()
-            )
-        }
+        return ApiResponseDTO(result = domainService.getDomainById(cfid!!).toDTO())
     }
 
     @Operation(summary = "Create domain", tags = ["domain"])
@@ -77,19 +50,7 @@ class DomainController(
     ])
     @PostMapping
     fun createDomain(@RequestBody domain: DomainRequestDTO): ApiResponseDTO<DomainResponseDTO> {
-        try {
-            return ApiResponseDTO(result = domainService.createDomain(domain).toDTO())
-        } catch(e : PowerDNSAPIException) {
-            var idx = 0
-            val errors = mutableListOf(ErrorOrMessage(idx, e.message ?: ""))
-            e.errors.forEach{
-                errors.add(ErrorOrMessage(idx++, it))
-            }
-
-            throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
-                ApiResponseDTO(false, errors = errors, result = listOf(null)).toString()
-            )
-        }
+        return ApiResponseDTO(result = domainService.createDomain(domain).toDTO())
     }
 
     @Operation(summary = "Delete domain", tags = ["domain"])
@@ -100,21 +61,9 @@ class DomainController(
     ])
     @DeleteMapping("/{domain_id}")
     fun deleteDomain(@PathVariable domain_id: String?): ApiResponseDTO<DeleteResponseWithId> {
-        try {
-            domainService.deleteDomain(domain_id!!)
+        domainService.deleteDomain(domain_id!!)
 
-            return ApiResponseDTO(result = DeleteResponseWithId(domain_id))
-        } catch (e: PowerDNSAPIException) {
-            var idx = 0
-            val errors = mutableListOf(ErrorOrMessage(idx, e.message ?: ""))
-            e.errors.forEach{
-                errors.add(ErrorOrMessage(idx++, it))
-            }
-
-            throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
-                ApiResponseDTO(false, errors = errors, result = listOf(null)).toString()
-            )
-        }
+        return ApiResponseDTO(result = DeleteResponseWithId(domain_id))
     }
 
     private fun Domain.toDTO() = DomainResponseDTO(id = cfid, name = name)
