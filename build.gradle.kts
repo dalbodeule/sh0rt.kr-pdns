@@ -81,7 +81,7 @@ tasks.withType<BootBuildImage> {
 
 	environment = mapOf(
 		"BP_NATIVE_IMAGE" to "true",
-		"BP_NATIVE_IMAGE_BUILD_ARGUMENTS" to "-H:+UnlockExperimentalVMOptions -H:ReflectionConfigurationFiles=src/main/resources/reflect-config.json",
+		"BP_NATIVE_IMAGE_BUILD_ARGUMENTS" to "-H:+UnlockExperimentalVMOptions",
 		"BP_JVM_TYPE" to "JDK",
 		"BP_JVM_VERSION" to "21",
 	)
@@ -100,6 +100,5 @@ tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
 graalvmNative {
 	binaries.all {
 		buildArgs.add("--initialize-at-build-time=org.slf4j.helpers")
-		buildArgs.add("-H:ReflectionConfigurationFiles=src/main/resources/reflect-config.json")
 	}
 }

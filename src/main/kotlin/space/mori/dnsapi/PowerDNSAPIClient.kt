@@ -1,6 +1,7 @@
 package space.mori.dnsapi
 
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -126,7 +127,11 @@ class PowerDNSAPIClient() {
     }
 }
 
-class PowerDNSAPIError(val error: String, val errors: List<String>)
+@ReflectiveAccess
+data class PowerDNSAPIError(
+    @SerializedName("error") val error: String,
+    @SerializedName("errors") val errors: List<String>
+)
 class PowerDNSAPIException(private val error: PowerDNSAPIError): RuntimeException(error.error) {
     val errors: List<String>
         get() = error.errors
