@@ -23,7 +23,7 @@ class PowerDNSAPIClient() {
     private val gson = Gson()
     private val client = OkHttpClient()
 
-    @Throws(PowerDNSAPIError::class)
+    @Throws(PowerDNSAPIException::class)
     fun createZone(zoneName: String): Response {
         val body = gson.toJson(mapOf(
             "name" to zoneName,
@@ -40,12 +40,12 @@ class PowerDNSAPIClient() {
         val response = client.newCall(request).execute()
         if(!response.isSuccessful) {
             val error = gson.fromJson(response.body?.string(), PowerDNSAPIError::class.java)
-            throw error
+            throw PowerDNSAPIException(error)
         }
         return response
     }
 
-    @Throws(PowerDNSAPIError::class)
+    @Throws(PowerDNSAPIException::class)
     fun deleteZone(zoneName: String): Response {
         val request = Request.Builder()
             .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName")
@@ -58,12 +58,12 @@ class PowerDNSAPIClient() {
         val response = client.newCall(request).execute()
         if(!response.isSuccessful) {
             val error = gson.fromJson(response.body?.string(), PowerDNSAPIError::class.java)
-            throw error
+            throw PowerDNSAPIException(error)
         }
         return response
     }
 
-    @Throws(PowerDNSAPIError::class)
+    @Throws(PowerDNSAPIException::class)
     fun createRecord(zoneName: String, recordName: String, recordType: String, recordContent: String): Response {
         val body = gson.toJson(mapOf(
             "name" to recordName,
@@ -81,12 +81,12 @@ class PowerDNSAPIClient() {
         val response = client.newCall(request).execute()
         if(!response.isSuccessful) {
             val error = gson.fromJson(response.body?.string(), PowerDNSAPIError::class.java)
-            throw error
+            throw PowerDNSAPIException(error)
         }
         return response
     }
 
-    @Throws(PowerDNSAPIError::class)
+    @Throws(PowerDNSAPIException::class)
     fun updateRecord(zoneName: String, recordName: String, recordType: String, recordContent: String): Response {
         val body = gson.toJson(mapOf(
             "content" to recordContent
@@ -102,12 +102,12 @@ class PowerDNSAPIClient() {
         val response = client.newCall(request).execute()
         if(!response.isSuccessful) {
             val error = gson.fromJson(response.body?.string(), PowerDNSAPIError::class.java)
-            throw error
+            throw PowerDNSAPIException(error)
         }
         return response
     }
 
-    @Throws(PowerDNSAPIError::class)
+    @Throws(PowerDNSAPIException::class)
     fun deleteRecord(zoneName: String, recordName: String, recordType: String): Response {
         val request = Request.Builder()
             .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName/records/$recordName/$recordType")
@@ -120,10 +120,14 @@ class PowerDNSAPIClient() {
         val response = client.newCall(request).execute()
         if(!response.isSuccessful) {
             val error = gson.fromJson(response.body?.string(), PowerDNSAPIError::class.java)
-            throw error
+            throw PowerDNSAPIException(error)
         }
         return response
     }
 }
 
-class PowerDNSAPIError(val error: String, val errors: List<String>): RuntimeException(error)
+class PowerDNSAPIError(val error: String, val errors: List<String>)
+class PowerDNSAPIException(private val error: PowerDNSAPIError): RuntimeException(error.error) {
+    val errors: List<String>
+        get() = error.errors
+}

@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
-import space.mori.dnsapi.PowerDNSAPIError
+import space.mori.dnsapi.PowerDNSAPIException
 import space.mori.dnsapi.db.Domain
 import space.mori.dnsapi.dto.*
 import space.mori.dnsapi.service.DomainService
@@ -31,12 +31,12 @@ class DomainController(
     fun allDomains(): ApiResponseDTO<List<DomainResponseDTO?>> {
         try {
             return ApiResponseDTO(result = domainService.getAllDomains().map { it.toDTO() })
-        } catch(e : PowerDNSAPIError) {
-            val errors = mutableListOf(e.error)
+        } catch(e : PowerDNSAPIException) {
+            val errors = mutableListOf(e.message)
             errors.addAll(e.errors)
-            throw ResponseStatusException(
-                HttpStatus.EXPECTATION_FAILED,
-                ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) }, result = listOf(null)).toString()
+            var idx = 0
+            throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
+                ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(idx++, it ?: "") }, result = listOf(null)).toString()
             )
         }
     }
@@ -53,11 +53,12 @@ class DomainController(
     ): ApiResponseDTO<DomainResponseDTO> {
         try {
             return ApiResponseDTO(result = domainService.getDomainById(cfid!!).toDTO())
-        } catch(e : PowerDNSAPIError) {
-            val errors = mutableListOf(e.error)
+        } catch(e : PowerDNSAPIException) {
+            val errors = mutableListOf(e.message)
             errors.addAll(e.errors)
+            var idx = 0
             throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
-                ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) }, result = listOf(null)).toString()
+                ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(idx++, it ?: "") }, result = listOf(null)).toString()
             )
         }
     }
@@ -72,11 +73,12 @@ class DomainController(
     fun createDomain(@RequestBody domain: DomainRequestDTO): ApiResponseDTO<DomainResponseDTO> {
         try {
             return ApiResponseDTO(result = domainService.createDomain(domain).toDTO())
-        } catch(e : PowerDNSAPIError) {
-            val errors = mutableListOf(e.error)
+        } catch(e : PowerDNSAPIException) {
+            val errors = mutableListOf(e.message)
             errors.addAll(e.errors)
+            var idx = 0
             throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
-                ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) }, result = listOf(null)).toString()
+                ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(idx++, it ?: "") }, result = listOf(null)).toString()
             )
         }
     }
@@ -93,11 +95,17 @@ class DomainController(
             domainService.deleteDomain(domain_id!!)
 
             return ApiResponseDTO(result = DeleteResponseWithId(domain_id))
-        } catch(e : PowerDNSAPIError) {
-            val errors = mutableListOf(e.error)
+        } catch (e: PowerDNSAPIException) {
+            val errors = mutableListOf(e.message)
             errors.addAll(e.errors)
-            throw ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
-                ApiResponseDTO(false, errors = errors.map { ErrorOrMessage(1, it) }, result = listOf(null)).toString()
+            var idx = 0
+            throw ResponseStatusException(
+                HttpStatus.EXPECTATION_FAILED,
+                ApiResponseDTO(
+                    false,
+                    errors = errors.map { ErrorOrMessage(idx++, it ?: "") },
+                    result = listOf(null)
+                ).toString()
             )
         }
     }
