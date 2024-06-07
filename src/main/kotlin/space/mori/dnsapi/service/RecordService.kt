@@ -32,13 +32,19 @@ class RecordService(
         if(domain.user.id != user.id)
             throw RuntimeException("Unauthorized to create record in API: $domain_id")
 
-        powerDNSApiClient.createRecord(domain.name, recordRequest.name, recordRequest.type, recordRequest.content)
+        recordRequest.ttl = when {
+            recordRequest.ttl == 1 -> 300
+            recordRequest.ttl < 300 -> 300
+            else -> recordRequest.ttl
+        }
+
+        powerDNSApiClient.createRecord(domain.name, recordRequest.name, recordRequest.type, recordRequest.value, recordRequest.ttl, recordRequest.priority ?: 0)
 
         val record = DomainRecord(
             domain = domain,
             name = recordRequest.name,
             type = recordRequest.type,
-            content = recordRequest.content,
+            content = recordRequest.value,
             ttl = recordRequest.ttl,
             prio = recordRequest.priority ?: 0,
             disabled = false,
@@ -134,13 +140,19 @@ class RecordService(
         // 레코드 업데이트
         record.name = updatedRecord.name
         record.type = updatedRecord.type
-        record.content = updatedRecord.content
+        record.content = updatedRecord.value
         record.ttl = updatedRecord.ttl
         record.prio = updatedRecord.priority ?: 0
         record.comment = updatedRecord.comment
         record.modifiedOn = Date()
 
-        powerDNSApiClient.updateRecord(domain!!.name, updatedRecord.name, updatedRecord.type, updatedRecord.content)
+        record.ttl = when {
+            record.ttl == 1 -> 300
+            record.ttl < 300 -> 300
+            else -> record.ttl
+        }
+
+        powerDNSApiClient.updateRecord(domain!!.name, updatedRecord.name, updatedRecord.type, updatedRecord.value)
 
         // 저장
         val savedRecord = recordRepository.save(record)

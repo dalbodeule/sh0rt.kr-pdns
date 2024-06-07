@@ -11,10 +11,10 @@ data class RecordRequestDTO(
     val name: String,
 
     @Schema(description = "Record data", example = "192.0.2.1")
-    val content: String,
+    val value: String,
 
     @Schema(description = "TTL (Time to Live)", example = "3600")
-    val ttl: Int = 300,
+    var ttl: Int = 300,
 
     @Schema(description = "Priority", example = "0")
     val priority: Int? = null,
