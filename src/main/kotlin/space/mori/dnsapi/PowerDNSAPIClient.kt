@@ -38,7 +38,7 @@ class PowerDNSAPIClient() {
 
         val response = client.newCall(request).execute()
         if(!response.isSuccessful) {
-            throw gson.fromJson(response.body?.string(), Error::class.java)
+            throw gson.fromJson(response.body?.string(), PowerDNSAPIError::class.java)
         }
         return response
     }
@@ -54,7 +54,7 @@ class PowerDNSAPIClient() {
 
         val response = client.newCall(request).execute()
         if(!response.isSuccessful) {
-            throw gson.fromJson(response.body?.string(), Error::class.java)
+            throw gson.fromJson(response.body?.string(), PowerDNSAPIError::class.java)
         }
         return response
     }
@@ -94,7 +94,7 @@ class PowerDNSAPIClient() {
 
         val response = client.newCall(request).execute()
         if(!response.isSuccessful) {
-            throw gson.fromJson(response.body?.string(), Error::class.java)
+            throw gson.fromJson(response.body?.string(), PowerDNSAPIError::class.java)
         }
         return response
     }
@@ -110,7 +110,7 @@ class PowerDNSAPIClient() {
 
         val response = client.newCall(request).execute()
         if(!response.isSuccessful) {
-            throw gson.fromJson(response.body?.string(), Error::class.java)
+            throw gson.fromJson(response.body?.string(), PowerDNSAPIError::class.java)
         }
         return response
     }
