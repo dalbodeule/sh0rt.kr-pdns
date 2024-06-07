@@ -53,6 +53,7 @@ class RecordService(
             modifiedOn = Date(),
             comment = recordRequest.comment,
         )
+        recordRepository.save(record)
 
         return RecordResponseDTO(
             id = record.cfid,
@@ -63,7 +64,7 @@ class RecordService(
             proxied = false,
             ttl = record.ttl,
             locked = false,
-            zoneId = record.cfid,
+            zoneId = record.domain.cfid,
             zoneName = domain.name,
             createdOn = record.createdOn.getISOFormat(),
             modifiedOn = record.modifiedOn.getISOFormat(),
@@ -181,6 +182,8 @@ class RecordService(
         val user = getCurrentUser()
         if(domain.user.id != user.id)
             throw RuntimeException("Unauthorized to create record in API: $domain_id")
+
+        println("$domain, $record_id")
 
         val record = recordRepository.findByDomainIdAndCfid(domain.id!!, record_id).orElseThrow {
             RuntimeException("Failed to find record in API: $record_id")
