@@ -6,6 +6,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import okhttp3.internal.concat
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
@@ -27,15 +28,20 @@ class PowerDNSAPIClient() {
         val body = gson.toJson(mapOf(
             "name" to zoneName,
             "nameservers" to nameserver.split(","))
-        ).toRequestBody("application/json".toMediaType())
+        ).toRequestBody()
         val request = Request.Builder()
             .url("$apiUrl/api/v1/servers/localhost/zones")
             .addHeader("X-API-Key", apiKey)
+            .addHeader("Accept", "application/json")
+            .addHeader("Content-Type", "application/json")
             .post(body)
             .build()
 
         val response = client.newCall(request).execute()
-        if(!response.isSuccessful) { throw RuntimeException("Unexpected code $response") }
+        if(!response.isSuccessful) {
+            val error = gson.fromJson(response.body?.string(), Error::class.java)
+            throw RuntimeException("Unexpected code ${error.error}, ${error.errors.concat(", ")}")
+        }
         return response
     }
 
@@ -43,11 +49,16 @@ class PowerDNSAPIClient() {
         val request = Request.Builder()
             .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName")
             .addHeader("X-API-Key", apiKey)
+            .addHeader("Accept", "application/json")
+            .addHeader("Content-Type", "application/json")
             .delete()
             .build()
 
         val response = client.newCall(request).execute()
-        if(!response.isSuccessful) { throw RuntimeException("Unexpected code $response") }
+        if(!response.isSuccessful) {
+            val error = gson.fromJson(response.body?.string(), Error::class.java)
+            throw RuntimeException("Unexpected code ${error.error}, ${error.errors.concat(", ")}")
+        }
         return response
     }
 
@@ -60,11 +71,16 @@ class PowerDNSAPIClient() {
         val request = Request.Builder()
             .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName/records")
             .addHeader("X-API-Key", apiKey)
+            .addHeader("Accept", "application/json")
+            .addHeader("Content-Type", "application/json")
             .post(body)
             .build()
 
         val response = client.newCall(request).execute()
-        if(!response.isSuccessful) { throw RuntimeException("Unexpected code $response") }
+        if(!response.isSuccessful) {
+            val error = gson.fromJson(response.body?.string(), Error::class.java)
+            throw RuntimeException("Unexpected code ${error.error}, ${error.errors.concat(", ")}")
+        }
         return response
     }
 
@@ -75,11 +91,16 @@ class PowerDNSAPIClient() {
         val request = Request.Builder()
             .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName/records/$recordName/$recordType")
             .addHeader("X-API-Key", apiKey)
+            .addHeader("Accept", "application/json")
+            .addHeader("Content-Type", "application/json")
             .put(body)
             .build()
 
         val response = client.newCall(request).execute()
-        if(!response.isSuccessful) { throw RuntimeException("Unexpected code $response") }
+        if(!response.isSuccessful) {
+            val error = gson.fromJson(response.body?.string(), Error::class.java)
+            throw RuntimeException("Unexpected code ${error.error}, ${error.errors.concat(", ")}")
+        }
         return response
     }
 
@@ -87,11 +108,18 @@ class PowerDNSAPIClient() {
         val request = Request.Builder()
             .url("$apiUrl/api/v1/servers/localhost/zones/$zoneName/records/$recordName/$recordType")
             .addHeader("X-API-Key", apiKey)
+            .addHeader("Accept", "application/json")
+            .addHeader("Content-Type", "application/json")
             .delete()
             .build()
 
         val response = client.newCall(request).execute()
-        if(!response.isSuccessful) { throw RuntimeException("Unexpected code $response") }
+        if(!response.isSuccessful) {
+            val error = gson.fromJson(response.body?.string(), Error::class.java)
+            throw RuntimeException("Unexpected code ${error.error}, ${error.errors.concat(", ")}")
+        }
         return response
     }
 }
+
+data class Error(val error: String, val errors: Array<String>)
