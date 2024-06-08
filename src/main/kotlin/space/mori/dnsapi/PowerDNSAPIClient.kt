@@ -76,7 +76,7 @@ class PowerDNSAPIClient() {
     @Throws(PowerDNSAPIException::class)
     fun createRecord(zoneName: String, recordName: String, recordType: String, recordContent: String, ttl: Int = 300, priority: Int = 0): Response {
         val rrset = mapOf(
-            "name" to "$recordName.$zoneName.",
+            "name" to recordName,
             "type" to recordType,
             "ttl" to ttl,
             "changetype" to "REPLACE",
@@ -109,7 +109,7 @@ class PowerDNSAPIClient() {
     @Throws(PowerDNSAPIException::class)
     fun updateRecord(zoneName: String, recordName: String, recordType: String, recordContent: String, ttl: Int = 300, priority: Int = 0): Response {
         val rrset = mapOf(
-            "name" to "$recordName.$zoneName.",
+            "name" to recordName,
             "type" to recordType,
             "ttl" to ttl,
             "changetype" to "REPLACE",
@@ -142,7 +142,7 @@ class PowerDNSAPIClient() {
     @Throws(PowerDNSAPIException::class)
     fun deleteRecord(zoneName: String, recordName: String, recordType: String): Response {
         val rrset = mapOf(
-            "name" to "$recordName.$zoneName.",
+            "name" to recordName,
             "type" to recordType,
             "changetype" to "DELETE",
             "records" to listOf<Map<String, Any>>()  // 빈 레코드 리스트
