@@ -61,7 +61,7 @@ class RecordController(
         return ApiResponseDTO(result = DeleteResponseWithId(record_id))
     }
 
-    @PatchMapping("{zone_id}/dns_records/{dns_record_id}")
+    @PutMapping("{zone_id}/dns_records/{dns_record_id}")
     @Operation(summary = "Update Record by ID", tags=["record"])
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "Return Record", useReturnTypeSchema = true),
