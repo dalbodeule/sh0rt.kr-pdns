@@ -167,7 +167,11 @@ class PowerDNSAPIClient() {
 data class PowerDNSAPIError(
     @SerializedName("error") val error: String,
     @SerializedName("errors") val errors: List<String>?
-)
+) {
+    override fun toString(): String {
+        return "PowerDNSAPIError(error=$error, errors=${errors?.joinToString(", ")})"
+    }
+}
 
 class PowerDNSAPIErrorDeserializer : JsonDeserializer<PowerDNSAPIError?> {
     @Throws(JsonParseException::class)

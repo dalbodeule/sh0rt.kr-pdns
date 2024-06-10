@@ -183,8 +183,6 @@ class RecordService(
         if(domain.user.id != user.id)
             throw RuntimeException("Unauthorized to create record in API: $domain_id")
 
-        println("$domain, $record_id")
-
         val record = recordRepository.findByDomainIdAndCfid(domain.id!!, record_id).orElseThrow {
             RuntimeException("Failed to find record in API: $record_id")
         }
