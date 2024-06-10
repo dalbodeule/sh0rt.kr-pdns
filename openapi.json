@@ -1,0 +1,801 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Cloudflare compatible PowerDNS API Server",
+    "version": "v1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "security": [
+    {
+      "api token": []
+    }
+  ],
+  "paths": {
+    "/zones": {
+      "get": {
+        "tags": [
+          "domain"
+        ],
+        "summary": "Get all domains",
+        "operationId": "allDomains",
+        "responses": {
+          "200": {
+            "description": "Returns all domains",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDTOListDomainResponseDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "domain"
+        ],
+        "summary": "Create domain",
+        "operationId": "createDomain",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DomainRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Created domain",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDTODomainResponseDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/zones/{zone_id}/dns_records": {
+      "get": {
+        "tags": [
+          "record"
+        ],
+        "summary": "Get all records",
+        "operationId": "allRecords",
+        "parameters": [
+          {
+            "name": "zone_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return All Records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDTOListRecordResponseDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "record"
+        ],
+        "summary": "Add Record by ID",
+        "operationId": "createRecord",
+        "parameters": [
+          {
+            "name": "zone_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Return Record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDTORecordResponseDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/zones/{zone_id}/dns_records/{dns_record_id}": {
+      "get": {
+        "tags": [
+          "record"
+        ],
+        "summary": "Get Record by ID",
+        "operationId": "getRecordByCfid",
+        "parameters": [
+          {
+            "name": "zone_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dns_record_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return Record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDTORecordResponseDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "record"
+        ],
+        "summary": "Remove Record by ID",
+        "operationId": "deleteRecord",
+        "parameters": [
+          {
+            "name": "zone_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dns_record_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return Record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDTODeleteResponseWithId"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "record"
+        ],
+        "summary": "Update Record by ID",
+        "operationId": "updateRecord",
+        "parameters": [
+          {
+            "name": "zone_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dns_record_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Return Record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDTORecordResponseDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/zones/{cfid}": {
+      "get": {
+        "tags": [
+          "domain"
+        ],
+        "summary": "Get domain",
+        "operationId": "getDomainByCfid",
+        "parameters": [
+          {
+            "name": "cfid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns domain",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDTODomainResponseDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/zones/{domain_id}": {
+      "delete": {
+        "tags": [
+          "domain"
+        ],
+        "summary": "Delete domain",
+        "operationId": "deleteDomain",
+        "parameters": [
+          {
+            "name": "domain_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted domain",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDTODeleteResponseWithId"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DomainRequestDTO": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Domain name(TLD)",
+            "example": "example.com"
+          }
+        },
+        "description": "Request DTO for Domain"
+      },
+      "ApiResponseDTO": {
+        "required": [
+          "errors",
+          "messages",
+          "success"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErrorOrMessage"
+            }
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErrorOrMessage"
+            }
+          },
+          "result": {
+            "type": "object"
+          }
+        }
+      },
+      "ErrorOrMessage": {
+        "required": [
+          "code",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseDTODomainResponseDTO": {
+        "required": [
+          "errors",
+          "messages",
+          "success"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErrorOrMessage"
+            }
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErrorOrMessage"
+            }
+          },
+          "result": {
+            "$ref": "#/components/schemas/DomainResponseDTO"
+          }
+        }
+      },
+      "DomainResponseDTO": {
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Domain CFID",
+            "example": "123e4567e89b12d3a456426655440000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Domain name(TLD)",
+            "example": "example.com"
+          }
+        },
+        "description": "Response DTO for Domain"
+      },
+      "RecordRequestDTO": {
+        "required": [
+          "comment",
+          "content",
+          "name",
+          "proxied",
+          "ttl",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Record type",
+            "example": "A"
+          },
+          "name": {
+            "type": "string",
+            "description": "Host name",
+            "example": "www"
+          },
+          "content": {
+            "type": "string",
+            "description": "Record data",
+            "example": "192.0.2.1"
+          },
+          "ttl": {
+            "type": "integer",
+            "description": "TTL (Time to Live)",
+            "format": "int32",
+            "example": 3600
+          },
+          "priority": {
+            "type": "integer",
+            "description": "Priority",
+            "format": "int32",
+            "example": 0
+          },
+          "proxied": {
+            "type": "boolean",
+            "description": "Proxied: cloudflare api compatibility",
+            "example": false
+          },
+          "comment": {
+            "type": "string",
+            "description": "comment"
+          }
+        },
+        "description": "Request DTO for Record"
+      },
+      "ApiResponseDTORecordResponseDTO": {
+        "required": [
+          "errors",
+          "messages",
+          "success"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErrorOrMessage"
+            }
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErrorOrMessage"
+            }
+          },
+          "result": {
+            "$ref": "#/components/schemas/RecordResponseDTO"
+          }
+        }
+      },
+      "RecordResponseDTO": {
+        "required": [
+          "content",
+          "createdOn",
+          "id",
+          "locked",
+          "modifiedOn",
+          "name",
+          "proxiable",
+          "proxied",
+          "ttl",
+          "type",
+          "zoneId",
+          "zoneName"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Record ID",
+            "example": "123e4567e89b12d3a456426655440001"
+          },
+          "type": {
+            "type": "string",
+            "description": "Record type",
+            "example": "A"
+          },
+          "name": {
+            "type": "string",
+            "description": "Record name",
+            "example": "test"
+          },
+          "content": {
+            "type": "string",
+            "description": "Record content",
+            "example": "1.1.1.1"
+          },
+          "zoneId": {
+            "type": "string",
+            "description": "Zone(TLD) ID",
+            "example": "123e4567e89b12d3a456426655440001"
+          },
+          "zoneName": {
+            "type": "string",
+            "description": "Zone name(TLD)",
+            "example": "example.com"
+          },
+          "createdOn": {
+            "type": "string",
+            "description": "Record creation time",
+            "example": "2014-01-01T05:20:00.12345Z"
+          },
+          "modifiedOn": {
+            "type": "string",
+            "description": "Record modification time",
+            "example": "2014-01-01T05:20:00.12345Z"
+          },
+          "priority": {
+            "type": "integer",
+            "description": "Record priority",
+            "format": "int32",
+            "example": 0
+          },
+          "proxiable": {
+            "type": "boolean",
+            "description": "is proxyable: must false",
+            "example": false
+          },
+          "proxied": {
+            "type": "boolean",
+            "description": "is proxied: must false",
+            "example": false
+          },
+          "ttl": {
+            "type": "integer",
+            "description": "Record TTL",
+            "format": "int32",
+            "example": 300
+          },
+          "locked": {
+            "type": "boolean",
+            "description": "Record is locked: must false",
+            "example": false
+          },
+          "comment": {
+            "type": "string",
+            "description": "Record comments"
+          }
+        },
+        "description": "Response DTO for Record"
+      },
+      "ApiResponseDTOListDomainResponseDTO": {
+        "required": [
+          "errors",
+          "messages",
+          "success"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErrorOrMessage"
+            }
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErrorOrMessage"
+            }
+          },
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DomainResponseDTO"
+            }
+          }
+        }
+      },
+      "ApiResponseDTOListRecordResponseDTO": {
+        "required": [
+          "errors",
+          "messages",
+          "success"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErrorOrMessage"
+            }
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErrorOrMessage"
+            }
+          },
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecordResponseDTO"
+            }
+          }
+        }
+      },
+      "ApiResponseDTODeleteResponseWithId": {
+        "required": [
+          "errors",
+          "messages",
+          "success"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErrorOrMessage"
+            }
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErrorOrMessage"
+            }
+          },
+          "result": {
+            "$ref": "#/components/schemas/DeleteResponseWithId"
+          }
+        }
+      },
+      "DeleteResponseWithId": {
+        "required": [
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "api token": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}
