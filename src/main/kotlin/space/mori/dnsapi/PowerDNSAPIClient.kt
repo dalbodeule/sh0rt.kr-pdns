@@ -66,7 +66,6 @@ class PowerDNSAPIClient() {
         val response = client.newCall(request).execute()
         if(!response.isSuccessful) {
             val str = response.body?.string()
-            println(str)
             val error = gson.fromJson(str, PowerDNSAPIError::class.java)
             throw PowerDNSAPIException(error)
         }
@@ -99,7 +98,6 @@ class PowerDNSAPIClient() {
         val response = client.newCall(request).execute()
         if(!response.isSuccessful) {
             val str = response.body?.string()
-            println(str)
             val error = gson.fromJson(str, PowerDNSAPIError::class.java)
             throw PowerDNSAPIException(error)
         }
@@ -132,7 +130,6 @@ class PowerDNSAPIClient() {
         val response = client.newCall(request).execute()
         if(!response.isSuccessful) {
             val str = response.body?.string()
-            println(str)
             val error = gson.fromJson(str, PowerDNSAPIError::class.java)
             throw PowerDNSAPIException(error)
         }
@@ -159,7 +156,6 @@ class PowerDNSAPIClient() {
         val response = client.newCall(request).execute()
         if(!response.isSuccessful) {
             val str = response.body?.string()
-            println(str)
             val error = gson.fromJson(str, PowerDNSAPIError::class.java)
             throw PowerDNSAPIException(error)
         }
