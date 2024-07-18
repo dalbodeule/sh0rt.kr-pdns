@@ -1,5 +1,7 @@
 # Cloudflare compatible PowerDNS API Server
 
+[![Discord](https://img.shields.io/discord/630271953806295051)](https://discord.gg/EPnCfz7xx5) [![Build Status](https://teamcity.mori.space/app/rest/builds/buildType:PdnsApi_Build/statusIcon)](https://teamcity.mori.space/project/PdnsApi)
+
 > Version v1.0.0
 
 ## Path Table
