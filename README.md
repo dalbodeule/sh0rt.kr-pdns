@@ -4,6 +4,18 @@
 
 > Version v1.0.0
 
+## env Table
+| name | value                                                                 |
+| ---  |-----------------------------------------------------------------------|
+| DB_HOST | database host (mysql/mariadb)                                         |
+| DB_PORT | database port (3306)                                                  |
+| DB_NAME | database name                                                         |
+| DB_USER | database connect user                                                 |
+| DB_PASSWORD | database connect password                                             |
+| PDNS_API_KEY | PowerDNS Auth API Key                                                 |
+| PDNS_API_URL | PowerDNS HTTP API URL (contain host, port ex: http://pdns:8081)       |
+| PDNS_NS | Nameserver addresses with comma splitted. (ns1.sh0rt.kr,ns2.sh0rt.kr) |
+
 ## Path Table
 
 | Method | Path | Description |
