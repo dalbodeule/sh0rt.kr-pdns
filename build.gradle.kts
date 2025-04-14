@@ -64,7 +64,7 @@ tasks.withType<Test> {
 }
 
 tasks.withType<BootBuildImage> {
-	val dockerId = System.getenv("DOCKER_USERNAME") ?: "dalbodeule"
+	val dockerId = System.getenv("DOCKER_USERNAME") ?: "git.mori.space/dalbodeule"
 	val dockerPw = System.getenv("DOCKER_PASSWORD") ?: ""
 
 	docker {
