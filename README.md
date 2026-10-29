@@ -2,897 +2,175 @@
 
 [![Discord](https://img.shields.io/discord/630271953806295051)](https://discord.gg/EPnCfz7xx5) [![Build Status](https://teamcity.mori.space/app/rest/builds/buildType:PdnsApi_Build/statusIcon)](https://teamcity.mori.space/project/PdnsApi)
 
-> Version v1.0.0
+A Kotlin and Spring Boot API that exposes Cloudflare-style zone and DNS record endpoints backed by PowerDNS and MariaDB. API requests use `Authorization: Bearer <API_KEY>`.
 
-## env Table
-| name | value                                                                 |
-| ---  |-----------------------------------------------------------------------|
-| DB_HOST | database host (mysql/mariadb)                                         |
-| DB_PORT | database port (3306)                                                  |
-| DB_NAME | database name                                                         |
-| DB_USER | database connect user                                                 |
-| DB_PASSWORD | database connect password                                             |
-| PDNS_API_KEY | PowerDNS Auth API Key                                                 |
-| PDNS_API_URL | PowerDNS HTTP API URL (contain host, port ex: http://pdns:8081)       |
-| PDNS_NS | Nameserver addresses with comma splitted. (ns1.sh0rt.kr,ns2.sh0rt.kr) |
+## Build and run
 
-## Path Table
+Use JDK 25. The Gradle wrapper selects the Java 25 toolchain for compilation.
 
-| Method | Path | Description |
-| --- | --- | --- |
-| GET | [/zones](#getzones) | Get all domains |
-| POST | [/zones](#postzones) | Create domain |
-| GET | [/zones/{zone_id}/dns_records](#getzoneszone_iddns_records) | Get all records |
-| POST | [/zones/{zone_id}/dns_records](#postzoneszone_iddns_records) | Add Record by ID |
-| GET | [/zones/{zone_id}/dns_records/{dns_record_id}](#getzoneszone_iddns_recordsdns_record_id) | Get Record by ID |
-| DELETE | [/zones/{zone_id}/dns_records/{dns_record_id}](#deletezoneszone_iddns_recordsdns_record_id) | Remove Record by ID |
-| PUT | [/zones/{zone_id}/dns_records/{dns_record_id}](#putzoneszone_iddns_recordsdns_record_id) | Update Record by ID |
-| GET | [/zones/{cfid}](#getzonescfid) | Get domain |
-| DELETE | [/zones/{domain_id}](#deletezonesdomain_id) | Delete domain |
-
-## Reference Table
-
-| Name | Path | Description |
-| --- | --- | --- |
-| DomainRequestDTO | [#/components/schemas/DomainRequestDTO](#componentsschemasdomainrequestdto) | Request DTO for Domain |
-| ApiResponseDTO | [#/components/schemas/ApiResponseDTO](#componentsschemasapiresponsedto) |  |
-| ErrorOrMessage | [#/components/schemas/ErrorOrMessage](#componentsschemaserrorormessage) |  |
-| ApiResponseDTODomainResponseDTO | [#/components/schemas/ApiResponseDTODomainResponseDTO](#componentsschemasapiresponsedtodomainresponsedto) |  |
-| DomainResponseDTO | [#/components/schemas/DomainResponseDTO](#componentsschemasdomainresponsedto) | Response DTO for Domain |
-| RecordRequestDTO | [#/components/schemas/RecordRequestDTO](#componentsschemasrecordrequestdto) | Request DTO for Record |
-| ApiResponseDTORecordResponseDTO | [#/components/schemas/ApiResponseDTORecordResponseDTO](#componentsschemasapiresponsedtorecordresponsedto) |  |
-| RecordResponseDTO | [#/components/schemas/RecordResponseDTO](#componentsschemasrecordresponsedto) | Response DTO for Record |
-| ApiResponseDTOListDomainResponseDTO | [#/components/schemas/ApiResponseDTOListDomainResponseDTO](#componentsschemasapiresponsedtolistdomainresponsedto) |  |
-| ApiResponseDTOListRecordResponseDTO | [#/components/schemas/ApiResponseDTOListRecordResponseDTO](#componentsschemasapiresponsedtolistrecordresponsedto) |  |
-| ApiResponseDTODeleteResponseWithId | [#/components/schemas/ApiResponseDTODeleteResponseWithId](#componentsschemasapiresponsedtodeleteresponsewithid) |  |
-| DeleteResponseWithId | [#/components/schemas/DeleteResponseWithId](#componentsschemasdeleteresponsewithid) |  |
-| api token | [#/components/securitySchemes/api token](#componentssecurityschemesapi-token) |  |
-
-## Path Details
-
-***
-
-### [GET]/zones
-
-- Summary  
-Get all domains
-
-#### Responses
-
-- 200 Returns all domains
-
-`application/json`
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  // Response DTO for Domain
-  result: {
-    // Domain CFID
-    id: string
-    // Domain name(TLD)
-    name: string
-  }[]
-}
+```sh
+./gradlew test bootJar
+./gradlew bootRun
 ```
 
-- 404 Returns not found
+`bootRun` activates the `dev` profile. Supply the environment variables below before starting the app. Tests use an in-memory H2 database and do not require MariaDB or PowerDNS.
 
-`application/json`
+| Variable | Description |
+| --- | --- |
+| `DB_HOST` | MariaDB host |
+| `DB_PORT` | MariaDB port, usually `3306` |
+| `DB_NAME` | Database name |
+| `DB_USER` | Database user |
+| `DB_PASSWORD` | Database password |
+| `PDNS_API_KEY` | PowerDNS HTTP API key |
+| `PDNS_API_URL` | PowerDNS HTTP API base URL, for example `http://pdns:8081` |
+| `PDNS_NS` | Comma-separated nameservers, for example `ns1.example.com,ns2.example.com` |
 
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  result: {
-  }
-}
+## Update API documentation
+
+```sh
+./gradlew updateDocs
 ```
 
-***
-
-### [POST]/zones
-
-- Summary  
-Create domain
-
-#### RequestBody
-
-- application/json
-
-```ts
-// Request DTO for Domain
-{
-  // Domain name(TLD)
-  name: string
-}
-```
-
-#### Responses
-
-- 200 Created domain
-
-`application/json`
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  // Response DTO for Domain
-  result: {
-    // Domain CFID
-    id: string
-    // Domain name(TLD)
-    name: string
-  }
-}
-```
-
-- 400 Bad request
-
-`application/json`
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  result: {
-  }
-}
-```
-
-***
-
-### [GET]/zones/{zone_id}/dns_records
-
-- Summary  
-Get all records
-
-#### Responses
-
-- 200 Return All Records
-
-`application/json`
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  // Response DTO for Record
-  result: {
-    // Record ID
-    id: string
-    // Record type
-    type: string
-    // Record name
-    name: string
-    // Record content
-    content: string
-    // Zone(TLD) ID
-    zoneId: string
-    // Zone name(TLD)
-    zoneName: string
-    // Record creation time
-    createdOn: string
-    // Record modification time
-    modifiedOn: string
-    // Record priority
-    priority?: integer
-    // is proxyable: must false
-    proxiable: boolean
-    // is proxied: must false
-    proxied: boolean
-    // Record TTL
-    ttl: integer
-    // Record is locked: must false
-    locked: boolean
-    // Record comments
-    comment?: string
-  }[]
-}
-```
-
-- 400 Bad request
-
-`application/json`
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  result: {
-  }
-}
-```
-
-***
-
-### [POST]/zones/{zone_id}/dns_records
-
-- Summary  
-Add Record by ID
-
-#### RequestBody
-
-- application/json
-
-```ts
-// Request DTO for Record
-{
-  // Record type
-  type: string
-  // Host name
-  name: string
-  // Record data
-  content: string
-  // TTL (Time to Live)
-  ttl: integer
-  // Priority
-  priority?: integer
-  // Proxied: cloudflare api compatibility
-  proxied: boolean
-  // comment
-  comment: string
-}
-```
-
-#### Responses
-
-- 200 Return Record
-
-`application/json`
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  // Response DTO for Record
-  result: {
-    // Record ID
-    id: string
-    // Record type
-    type: string
-    // Record name
-    name: string
-    // Record content
-    content: string
-    // Zone(TLD) ID
-    zoneId: string
-    // Zone name(TLD)
-    zoneName: string
-    // Record creation time
-    createdOn: string
-    // Record modification time
-    modifiedOn: string
-    // Record priority
-    priority?: integer
-    // is proxyable: must false
-    proxiable: boolean
-    // is proxied: must false
-    proxied: boolean
-    // Record TTL
-    ttl: integer
-    // Record is locked: must false
-    locked: boolean
-    // Record comments
-    comment?: string
-  }
-}
-```
-
-- 400 Bad request
-
-`application/json`
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  result: {
-  }
-}
-```
-
-***
-
-### [GET]/zones/{zone_id}/dns_records/{dns_record_id}
-
-- Summary  
-Get Record by ID
-
-#### Responses
-
-- 200 Return Record
-
-`application/json`
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  // Response DTO for Record
-  result: {
-    // Record ID
-    id: string
-    // Record type
-    type: string
-    // Record name
-    name: string
-    // Record content
-    content: string
-    // Zone(TLD) ID
-    zoneId: string
-    // Zone name(TLD)
-    zoneName: string
-    // Record creation time
-    createdOn: string
-    // Record modification time
-    modifiedOn: string
-    // Record priority
-    priority?: integer
-    // is proxyable: must false
-    proxiable: boolean
-    // is proxied: must false
-    proxied: boolean
-    // Record TTL
-    ttl: integer
-    // Record is locked: must false
-    locked: boolean
-    // Record comments
-    comment?: string
-  }
-}
-```
-
-- 400 Bad request
-
-`application/json`
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  result: {
-  }
-}
-```
-
-***
-
-### [DELETE]/zones/{zone_id}/dns_records/{dns_record_id}
-
-- Summary  
-Remove Record by ID
-
-#### Responses
-
-- 200 Return Record
-
-`application/json`
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  result: {
-    id: string
-  }
-}
-```
-
-- 400 Bad request
-
-`application/json`
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  result: {
-  }
-}
-```
-
-***
-
-### [PUT]/zones/{zone_id}/dns_records/{dns_record_id}
-
-- Summary  
-Update Record by ID
-
-#### RequestBody
-
-- application/json
-
-```ts
-// Request DTO for Record
-{
-  // Record type
-  type: string
-  // Host name
-  name: string
-  // Record data
-  content: string
-  // TTL (Time to Live)
-  ttl: integer
-  // Priority
-  priority?: integer
-  // Proxied: cloudflare api compatibility
-  proxied: boolean
-  // comment
-  comment: string
-}
-```
-
-#### Responses
-
-- 200 Return Record
-
-`application/json`
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  // Response DTO for Record
-  result: {
-    // Record ID
-    id: string
-    // Record type
-    type: string
-    // Record name
-    name: string
-    // Record content
-    content: string
-    // Zone(TLD) ID
-    zoneId: string
-    // Zone name(TLD)
-    zoneName: string
-    // Record creation time
-    createdOn: string
-    // Record modification time
-    modifiedOn: string
-    // Record priority
-    priority?: integer
-    // is proxyable: must false
-    proxiable: boolean
-    // is proxied: must false
-    proxied: boolean
-    // Record TTL
-    ttl: integer
-    // Record is locked: must false
-    locked: boolean
-    // Record comments
-    comment?: string
-  }
-}
-```
-
-- 400 Bad request
-
-`application/json`
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  result: {
-  }
-}
-```
-
-***
-
-### [GET]/zones/{cfid}
-
-- Summary  
-Get domain
-
-#### Responses
-
-- 200 Returns domain
-
-`application/json`
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  // Response DTO for Domain
-  result: {
-    // Domain CFID
-    id: string
-    // Domain name(TLD)
-    name: string
-  }
-}
-```
-
-- 404 Returns not found
-
-`application/json`
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  result: {
-  }
-}
-```
-
-***
-
-### [DELETE]/zones/{domain_id}
-
-- Summary  
-Delete domain
-
-#### Responses
-
-- 200 Deleted domain
-
-`application/json`
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  result: {
-    id: string
-  }
-}
-```
-
-- 400 Bad request
-
-`application/json`
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  result: {
-  }
-}
-```
-
-## References
-
-### #/components/schemas/DomainRequestDTO
-
-```ts
-// Request DTO for Domain
-{
-  // Domain name(TLD)
-  name: string
-}
-```
-
-### #/components/schemas/ApiResponseDTO
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  result: {
-  }
-}
-```
-
-### #/components/schemas/ErrorOrMessage
-
-```ts
-{
-  code: integer
-  message: string
-}
-```
-
-### #/components/schemas/ApiResponseDTODomainResponseDTO
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  // Response DTO for Domain
-  result: {
-    // Domain CFID
-    id: string
-    // Domain name(TLD)
-    name: string
-  }
-}
-```
-
-### #/components/schemas/DomainResponseDTO
-
-```ts
-// Response DTO for Domain
-{
-  // Domain CFID
-  id: string
-  // Domain name(TLD)
-  name: string
-}
-```
-
-### #/components/schemas/RecordRequestDTO
-
-```ts
-// Request DTO for Record
-{
-  // Record type
-  type: string
-  // Host name
-  name: string
-  // Record data
-  content: string
-  // TTL (Time to Live)
-  ttl: integer
-  // Priority
-  priority?: integer
-  // Proxied: cloudflare api compatibility
-  proxied: boolean
-  // comment
-  comment: string
-}
-```
-
-### #/components/schemas/ApiResponseDTORecordResponseDTO
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  // Response DTO for Record
-  result: {
-    // Record ID
-    id: string
-    // Record type
-    type: string
-    // Record name
-    name: string
-    // Record content
-    content: string
-    // Zone(TLD) ID
-    zoneId: string
-    // Zone name(TLD)
-    zoneName: string
-    // Record creation time
-    createdOn: string
-    // Record modification time
-    modifiedOn: string
-    // Record priority
-    priority?: integer
-    // is proxyable: must false
-    proxiable: boolean
-    // is proxied: must false
-    proxied: boolean
-    // Record TTL
-    ttl: integer
-    // Record is locked: must false
-    locked: boolean
-    // Record comments
-    comment?: string
-  }
-}
-```
-
-### #/components/schemas/RecordResponseDTO
-
-```ts
-// Response DTO for Record
-{
-  // Record ID
-  id: string
-  // Record type
-  type: string
-  // Record name
-  name: string
-  // Record content
-  content: string
-  // Zone(TLD) ID
-  zoneId: string
-  // Zone name(TLD)
-  zoneName: string
-  // Record creation time
-  createdOn: string
-  // Record modification time
-  modifiedOn: string
-  // Record priority
-  priority?: integer
-  // is proxyable: must false
-  proxiable: boolean
-  // is proxied: must false
-  proxied: boolean
-  // Record TTL
-  ttl: integer
-  // Record is locked: must false
-  locked: boolean
-  // Record comments
-  comment?: string
-}
-```
-
-### #/components/schemas/ApiResponseDTOListDomainResponseDTO
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  // Response DTO for Domain
-  result: {
-    // Domain CFID
-    id: string
-    // Domain name(TLD)
-    name: string
-  }[]
-}
-```
-
-### #/components/schemas/ApiResponseDTOListRecordResponseDTO
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  // Response DTO for Record
-  result: {
-    // Record ID
-    id: string
-    // Record type
-    type: string
-    // Record name
-    name: string
-    // Record content
-    content: string
-    // Zone(TLD) ID
-    zoneId: string
-    // Zone name(TLD)
-    zoneName: string
-    // Record creation time
-    createdOn: string
-    // Record modification time
-    modifiedOn: string
-    // Record priority
-    priority?: integer
-    // is proxyable: must false
-    proxiable: boolean
-    // is proxied: must false
-    proxied: boolean
-    // Record TTL
-    ttl: integer
-    // Record is locked: must false
-    locked: boolean
-    // Record comments
-    comment?: string
-  }[]
-}
-```
-
-### #/components/schemas/ApiResponseDTODeleteResponseWithId
-
-```ts
-{
-  success: boolean
-  errors: {
-    code: integer
-    message: string
-  }[]
-  messages:#/components/schemas/ErrorOrMessage[]
-  result: {
-    id: string
-  }
-}
-```
-
-### #/components/schemas/DeleteResponseWithId
-
-```ts
-{
-  id: string
-}
-```
-
-### #/components/securitySchemes/api token
-
-```ts
-{
-  "type": "http",
-  "scheme": "bearer"
-}
-```
+This task starts the app in a test context, writes the current OpenAPI 3.1 specification to [openapi.json](openapi.json), and refreshes the generated API section below. `generateOpenApi` and `updateReadme` are also available separately. The documentation task uses H2 and does not contact PowerDNS.
+
+## API reference
+
+<!-- BEGIN GENERATED API -->
+Generated from [openapi.json](openapi.json). Do not edit this section by hand.
+
+### Endpoints
+
+| Method | Path | Summary | Request body | Success response |
+| --- | --- | --- | --- | --- |
+| `GET` | `/zones` | Get all domains | — | 200: [ApiResponseDTOListDomainResponseDTO](#apiresponsedtolistdomainresponsedto) |
+| `POST` | `/zones` | Create domain | [DomainRequestDTO](#domainrequestdto) | 200: [ApiResponseDTODomainResponseDTO](#apiresponsedtodomainresponsedto) |
+| `GET` | `/zones/{cfid}` | Get domain | — | 200: [ApiResponseDTODomainResponseDTO](#apiresponsedtodomainresponsedto) |
+| `DELETE` | `/zones/{domain_id}` | Delete domain | — | 200: [ApiResponseDTODeleteResponseWithId](#apiresponsedtodeleteresponsewithid) |
+| `GET` | `/zones/{zone_id}/dns_records` | Get all records | — | 200: [ApiResponseDTOListRecordResponseDTO](#apiresponsedtolistrecordresponsedto) |
+| `POST` | `/zones/{zone_id}/dns_records` | Add Record by ID | [RecordRequestDTO](#recordrequestdto) | 200: [ApiResponseDTORecordResponseDTO](#apiresponsedtorecordresponsedto) |
+| `GET` | `/zones/{zone_id}/dns_records/{dns_record_id}` | Get Record by ID | — | 200: [ApiResponseDTORecordResponseDTO](#apiresponsedtorecordresponsedto) |
+| `PUT` | `/zones/{zone_id}/dns_records/{dns_record_id}` | Update Record by ID | [RecordRequestDTO](#recordrequestdto) | 200: [ApiResponseDTORecordResponseDTO](#apiresponsedtorecordresponsedto) |
+| `DELETE` | `/zones/{zone_id}/dns_records/{dns_record_id}` | Remove Record by ID | — | 200: [ApiResponseDTODeleteResponseWithId](#apiresponsedtodeleteresponsewithid) |
+
+### Schemas
+
+#### ApiResponseDTO
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `success` | boolean | No | — |
+| `errors` | array of [ErrorOrMessage](#errorormessage) | No | — |
+| `messages` | array of [ErrorOrMessage](#errorormessage) | No | — |
+| `result` | — | No | — |
+
+#### ApiResponseDTODeleteResponseWithId
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `success` | boolean | No | — |
+| `errors` | array of [ErrorOrMessage](#errorormessage) | No | — |
+| `messages` | array of [ErrorOrMessage](#errorormessage) | No | — |
+| `result` | [DeleteResponseWithId](#deleteresponsewithid) or null | No | — |
+
+#### ApiResponseDTODomainResponseDTO
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `success` | boolean | No | — |
+| `errors` | array of [ErrorOrMessage](#errorormessage) | No | — |
+| `messages` | array of [ErrorOrMessage](#errorormessage) | No | — |
+| `result` | [DomainResponseDTO](#domainresponsedto) or null | No | — |
+
+#### ApiResponseDTOListDomainResponseDTO
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `success` | boolean | No | — |
+| `errors` | array of [ErrorOrMessage](#errorormessage) | No | — |
+| `messages` | array of [ErrorOrMessage](#errorormessage) | No | — |
+| `result` | array of [DomainResponseDTO](#domainresponsedto) or null | No | — |
+
+#### ApiResponseDTOListRecordResponseDTO
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `success` | boolean | No | — |
+| `errors` | array of [ErrorOrMessage](#errorormessage) | No | — |
+| `messages` | array of [ErrorOrMessage](#errorormessage) | No | — |
+| `result` | array of [RecordResponseDTO](#recordresponsedto) or null | No | — |
+
+#### ApiResponseDTORecordResponseDTO
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `success` | boolean | No | — |
+| `errors` | array of [ErrorOrMessage](#errorormessage) | No | — |
+| `messages` | array of [ErrorOrMessage](#errorormessage) | No | — |
+| `result` | [RecordResponseDTO](#recordresponsedto) or null | No | — |
+
+#### DeleteResponseWithId
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `id` | string | No | — |
+
+#### DomainRequestDTO
+
+Request DTO for Domain
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `name` | string | No | Domain name(TLD) |
+
+#### DomainResponseDTO
+
+Response DTO for Domain
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `id` | string | No | Domain CFID |
+| `name` | string | No | Domain name(TLD) |
+
+#### ErrorOrMessage
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `code` | integer | No | — |
+| `message` | string | No | — |
+
+#### RecordRequestDTO
+
+Request DTO for Record
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `type` | string | No | Record type |
+| `name` | string | No | Host name |
+| `value` | string | No | Record data |
+| `ttl` | integer | No | TTL (Time to Live) |
+| `priority` | integer or null | No | Priority |
+| `proxied` | boolean | No | Proxied: cloudflare api compatibility |
+| `comment` | string | No | comment |
+
+#### RecordResponseDTO
+
+Response DTO for Record
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `id` | string | No | Record ID |
+| `type` | string | No | Record type |
+| `name` | string | No | Record name |
+| `content` | string | No | Record content |
+| `zoneId` | string | No | Zone(TLD) ID |
+| `zoneName` | string | No | Zone name(TLD) |
+| `createdOn` | string | No | Record creation time |
+| `modifiedOn` | string | No | Record modification time |
+| `priority` | integer or null | No | Record priority |
+| `proxiable` | boolean | No | is proxyable: must false |
+| `proxied` | boolean | No | is proxied: must false |
+| `ttl` | integer | No | Record TTL |
+| `locked` | boolean | No | Record is locked: must false |
+| `comment` | string or null | No | Record comments |
+<!-- END GENERATED API -->

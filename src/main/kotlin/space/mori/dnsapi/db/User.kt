@@ -15,7 +15,7 @@ data class User(
     @Column(nullable = false, unique = false, length = 20)
     val name: String,
 
-    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
     val domains: List<Domain> = mutableListOf(),
 ) {
     override fun toString(): String = "User(id=$id, name='$name')"

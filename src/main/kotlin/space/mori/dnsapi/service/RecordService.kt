@@ -64,7 +64,7 @@ class RecordService(
             proxied = false,
             ttl = record.ttl,
             locked = false,
-            zoneId = record.domain.cfid,
+            zoneId = domain.cfid,
             zoneName = domain.name,
             createdOn = record.createdOn.getISOFormat(),
             modifiedOn = record.modifiedOn.getISOFormat(),
@@ -82,8 +82,9 @@ class RecordService(
         if(domain.user.id != user.id)
             throw RuntimeException("Unauthorized to get record in API: $domain_id")
 
-        val record = domain.records.find { it.cfid == record_id }
-        if(record == null) throw RuntimeException("Failed to find record in API: $record_id")
+        val record = recordRepository.findByDomainIdAndCfid(domain.id!!, record_id).orElseThrow {
+            RuntimeException("Failed to find record in API: $record_id")
+        }
 
         return RecordResponseDTO(
             id = record.cfid,
@@ -91,15 +92,15 @@ class RecordService(
             name = record.name,
             content = record.content,
             ttl = record.ttl,
-            zoneId = record.domain.cfid,
-            zoneName = record.domain.name,
+            zoneId = domain.cfid,
+            zoneName = domain.name,
             createdOn = record.createdOn.getISOFormat(),
             modifiedOn = record.modifiedOn.getISOFormat(),
             comment = record.comment,
         )
     }
 
-    fun getRecordsByDomain(domain_id: String): List<RecordResponseDTO>? {
+    fun getRecordsByDomain(domain_id: String): List<RecordResponseDTO> {
         val domain = domainRepository.findByCfid(domain_id).orElseThrow {
             RuntimeException("Failed to find domain in API: $domain_id")
         }
@@ -108,13 +109,13 @@ class RecordService(
         if(domain.user.id != user.id)
             throw RuntimeException("Unauthorized to create record in API: $domain_id")
 
-        return domain?.records?.map { RecordResponseDTO(
+        return recordRepository.findAllByDomainId(domain.id!!).map { RecordResponseDTO(
             id = it.cfid,
             type = it.type,
             name = it.name,
             content = it.content,
-            zoneId = it.domain.cfid,
-            zoneName = it.domain.name,
+            zoneId = domain.cfid,
+            zoneName = domain.name,
             priority = it.prio,
             ttl = it.ttl,
             createdOn = it.createdOn.getISOFormat(),
@@ -153,7 +154,7 @@ class RecordService(
             else -> record.ttl
         }
 
-        powerDNSApiClient.updateRecord(domain!!.name, updatedRecord.name, updatedRecord.type, updatedRecord.value)
+        powerDNSApiClient.updateRecord(domain.name, updatedRecord.name, updatedRecord.type, updatedRecord.value, record.ttl, record.prio)
 
         // 저장
         val savedRecord = recordRepository.save(record)

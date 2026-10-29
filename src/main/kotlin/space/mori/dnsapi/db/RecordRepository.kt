@@ -5,12 +5,14 @@ import org.springframework.data.jpa.repository.JpaRepository
 import java.util.*
 
 
-interface RecordRepository : JpaRepository<Record?, Long?> {
+interface RecordRepository : JpaRepository<Record, Long> {
     @Transactional
     fun findByCfid(cfid: String): Optional<Record>
 
     @Transactional
     fun findByDomainIdAndCfid(domainId: Long, cfid: String): Optional<Record>
+
+    fun findAllByDomainId(domainId: Long): List<Record>
 
     @Transactional
     fun deleteByCfid(cfid: String): Int

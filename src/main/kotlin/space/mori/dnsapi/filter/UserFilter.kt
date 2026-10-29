@@ -35,4 +35,5 @@ class UserFilter(
 }
 
 fun getCurrentUser(): User =
-    SecurityContextHolder.getContext().authentication.principal as User
+    SecurityContextHolder.getContext().authentication?.principal as? User
+        ?: throw IllegalStateException("Authenticated user is required")

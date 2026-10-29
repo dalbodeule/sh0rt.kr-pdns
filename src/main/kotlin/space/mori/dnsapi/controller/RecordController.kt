@@ -24,7 +24,7 @@ class RecordController(
             content = [Content(schema = Schema(implementation = ApiResponseDTO::class))]),
     ])
     fun allRecords(@PathVariable zone_id: String): ApiResponseDTO<List<RecordResponseDTO>> {
-        return ApiResponseDTO(result = recordService.getRecordsByDomain(zone_id)?.map{ it } ?: listOf())
+        return ApiResponseDTO(result = recordService.getRecordsByDomain(zone_id))
     }
 
     @GetMapping("{zone_id}/dns_records/{dns_record_id}")

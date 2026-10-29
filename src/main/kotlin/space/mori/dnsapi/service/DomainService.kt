@@ -20,7 +20,6 @@ class DomainService(
         try {
             val user = getCurrentUser()
             val domain = domainRepository.findAllByUser(user)
-            if (domain.isEmpty()) throw RuntimeException("Unauthorized")
 
             return domain
         } catch(ex: Error) {
@@ -62,11 +61,14 @@ class DomainService(
             val domain = domainRepository.findByCfid(domain_id).orElseThrow {
                 throw RuntimeException("Domain with CFID $domain_id not found")
             }
+            val user = getCurrentUser()
+            if (domain.user.id != user.id)
+                throw RuntimeException("Unauthorized to delete domain in API: $domain_id")
 
             powerDNSApiClient.deleteZone(domain.name)
             val count = domainRepository.deleteByCfid(domain_id)
 
-            if (count > 0) throw RuntimeException("Domain with CFID $domain_id not found")
+            if (count == 0) throw RuntimeException("Domain with CFID $domain_id not found")
             return domain_id
         } catch(ex: Error) {
             throw ex

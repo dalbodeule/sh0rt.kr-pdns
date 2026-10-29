@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import java.util.*
 
 
-interface DomainRepository : JpaRepository<Domain?, Long?> {
+interface DomainRepository : JpaRepository<Domain, Long> {
     @Transactional
     fun findByCfid(cfid: String): Optional<Domain>
 
