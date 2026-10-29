@@ -1,6 +1,6 @@
 # Cloudflare compatible PowerDNS API Server
 
-[![Discord](https://img.shields.io/discord/630271953806295051)](https://discord.gg/EPnCfz7xx5) [![Build Status](https://teamcity.mori.space/app/rest/builds/buildType:PdnsApi_Build/statusIcon)](https://teamcity.mori.space/project/PdnsApi)
+[![Discord](https://img.shields.io/discord/630271953806295051)](https://discord.gg/EPnCfz7xx5)
 
 A Kotlin and Spring Boot API that exposes Cloudflare-style zone and DNS record endpoints backed by PowerDNS and MariaDB. API requests use `Authorization: Bearer <API_KEY>`.
 
@@ -25,6 +25,23 @@ Use JDK 25. The Gradle wrapper selects the Java 25 toolchain for compilation.
 | `PDNS_API_KEY` | PowerDNS HTTP API key |
 | `PDNS_API_URL` | PowerDNS HTTP API base URL, for example `http://pdns:8081` |
 | `PDNS_NS` | Comma-separated nameservers, for example `ns1.example.com,ns2.example.com` |
+
+## Publish AMD64 and ARM64 images
+
+The script builds a Linux native image for each architecture with Paketo Buildpacks, pushes the architecture-specific tags with Docker CLI credentials, then publishes a multi-platform manifest. Docker, Buildx, and a registry login with push access to the target repository are required. On a host with a different architecture, Docker must support emulation for the target platform.
+
+```sh
+./scripts/build-multiarch-image.sh 1.0.0
+```
+
+The default repository is `${DOCKER_USERNAME:-dalbodeule}/dnsapi`. Set `IMAGE_REPOSITORY` to use another repository, such as `git.mori.space/dalbodeule/dnsapi`. The script publishes `:1.0.0-amd64`, `:1.0.0-arm64`, `:1.0.0`, and `:latest`; set `PUBLISH_LATEST=0` to leave `:latest` unchanged. Review the commands without publishing by setting `DRY_RUN=1`.
+
+If a previous run built an architecture image locally but failed while pushing, log in to the registry and rerun with `RESUME=1`. The script checks the local image architecture and skips its costly rebuild.
+
+```sh
+docker login --username dalbodeule
+RESUME=1 ./scripts/build-multiarch-image.sh 1.0.0
+```
 
 ## Update API documentation
 

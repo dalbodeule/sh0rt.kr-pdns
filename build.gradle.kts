@@ -97,18 +97,24 @@ tasks.register("updateDocs") {
 
 tasks.withType<BootBuildImage> {
 	val dockerId = System.getenv("DOCKER_USERNAME") ?: "dalbodeule"
-	val dockerPw = System.getenv("DOCKER_PASSWORD") ?: ""
+	val dockerPw = System.getenv("DOCKER_PASSWORD")
 
 	docker {
 		publish = true
-		publishRegistry {
-			username = dockerId
-			password = dockerPw
+		if (!dockerPw.isNullOrBlank()) {
+			publishRegistry {
+				username = dockerId
+				password = dockerPw
+			}
 		}
 	}
 
 	imageName.set("$dockerId/dnsapi")
-	tags.set(setOf("$dockerId/dnsapi:latest", "$dockerId/dnsapi:${datetimeFormatter.format(LocalDateTime.now())}"))
+	if (providers.gradleProperty("multiArchImage").orNull == "true") {
+		tags.set(emptySet<String>())
+	} else {
+		tags.set(setOf("$dockerId/dnsapi:latest", "$dockerId/dnsapi:${datetimeFormatter.format(LocalDateTime.now())}"))
+	}
 	buildpacks.set(setOf("docker.io/paketobuildpacks/oracle", "urn:cnb:builder:paketo-buildpacks/java-native-image"))
 
 	environment = mapOf(
